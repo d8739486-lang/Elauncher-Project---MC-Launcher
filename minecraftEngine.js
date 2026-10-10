@@ -1601,6 +1601,16 @@ export async function launchMinecraftProcess(
     removeCustomSkinPack(instanceDir);
   }
 
+  // Inject ELauncher Abstract Background JavaAgent (works for Vanilla/Forge/Fabric on-the-fly without mod dependencies)
+  const bgAgentPath = path.join(launcherPath, 'tools', 'elauncher-bg.jar');
+  if (fs.existsSync(bgAgentPath)) {
+    jvmArgs.push(`-javaagent:${bgAgentPath}`);
+    onLog({
+      raw: '[LAUNCHER] Подключен модуль кинетического фона меню ELauncher (JavaAgent)',
+      level: 'info',
+    });
+  }
+
   jvmArgs.push('-cp', cpEntries.join(';'));
 
   const finalClasspathString = cpEntries.join(';');
