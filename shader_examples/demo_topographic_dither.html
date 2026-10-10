@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Dithered Topographic Shader - Eternal Launcher Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #050608; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .overlay {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      z-index: 10;
+      color: #fff;
+      background: rgba(14, 16, 22, 0.85);
+      border: 1px border rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      padding: 16px 20px;
+      border-radius: 12px;
+      max-width: 380px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    }
+    h1 { font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; color: #fff; }
+    p { font-size: 12px; line-height: 1.5; color: #8e96ac; margin-bottom: 12px; font-family: monospace; }
+    .controls { display: flex; gap: 8px; }
+    button {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #1b1e2a;
+      border: 1px solid #2d3348;
+      color: #c0c6d8;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    button:hover { background: #fff; color: #000; border-color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <h1>Topographic Dither Shader</h1>
+    <p>Топографические изолинии с 8x8 Bayer-дизерингом и плавной анимацией кривизны (WebGL 60 FPS).</p>
+    <div class="controls">
+      <button onclick="setTab(0)">Вкладка 1</button>
+      <button onclick="setTab(1)">Вкладка 2</button>
+      <button onclick="setTab(2)">Вкладка 3</button>
+      <button onclick="setTab(3)">Вкладка 4</button>
+    </div>
+  </div>
+
+  <canvas id="glcanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('glcanvas');
+    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'high-performance' });
+
+    const VS_SRC = `
+      attribute vec2 position;
+      void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
+    const FS_SRC = `
+      precision highp float;
+      uniform vec2 resolution;
+      uniform float time;
+      uniform vec2 mousePos;
+      uniform float tabOffset;
+
+      float getBayer8x8(vec2 coord) {
+        int x = int(mod(coord.x, 8.0));
+        int y = int(mod(coord.y, 8.0));
+        int idx = y * 8 + x;
+        if (idx == 0) return 0.0 / 64.0;
+        if (idx == 1) return 32.0 / 64.0;
+        if (idx == 2) return 8.0 / 64.0;
+        if (idx == 3) return 40.0 / 64.0;
+        if (idx == 4) return 2.0 / 64.0;
+        if (idx == 5) return 34.0 / 64.0;
+        if (idx == 6) return 10.0 / 64.0;
+        if (idx == 7) return 42.0 / 64.0;
+        if (idx == 8) return 48.0 / 64.0;
+        if (idx == 9) return 16.0 / 64.0;
+        if (idx == 10) return 56.0 / 64.0;
+        if (idx == 11) return 24.0 / 64.0;
+        if (idx == 12) return 50.0 / 64.0;
+        if (idx == 13) return 18.0 / 64.0;
+        if (idx == 14) return 58.0 / 64.0;
+        if (idx == 15) return 26.0 / 64.0;
+        if (idx == 16) return 12.0 / 64.0;
+        if (idx == 17) return 44.0 / 64.0;
+        if (idx == 18) return 4.0 / 64.0;
+        if (idx == 19) return 36.0 / 64.0;
+        if (idx == 20) return 14.0 / 64.0;
+        if (idx == 21) return 46.0 / 64.0;
+        if (idx == 22) return 6.0 / 64.0;
+        if (idx == 23) return 38.0 / 64.0;
+        if (idx == 24) return 60.0 / 64.0;
+        if (idx == 25) return 28.0 / 64.0;
+        if (idx == 26) return 52.0 / 64.0;
+        if (idx == 27) return 20.0 / 64.0;
+        if (idx == 28) return 62.0 / 64.0;
+        if (idx == 29) return 30.0 / 64.0;
+        if (idx == 30) return 54.0 / 64.0;
+        if (idx == 31) return 22.0 / 64.0;
+        if (idx == 32) return 3.0 / 64.0;
+        if (idx == 33) return 35.0 / 64.0;
+        if (idx == 34) return 11.0 / 64.0;
+        if (idx == 35) return 43.0 / 64.0;
+        if (idx == 36) return 1.0 / 64.0;
+        if (idx == 37) return 33.0 / 64.0;
+        if (idx == 38) return 9.0 / 64.0;
+        if (idx == 39) return 41.0 / 64.0;
+        if (idx == 40) return 51.0 / 64.0;
+        if (idx == 41) return 19.0 / 64.0;
+        if (idx == 42) return 59.0 / 64.0;
+        if (idx == 43) return 27.0 / 64.0;
+        if (idx == 44) return 49.0 / 64.0;
+        if (idx == 45) return 17.0 / 64.0;
+        if (idx == 46) return 57.0 / 64.0;
+        if (idx == 47) return 25.0 / 64.0;
+        if (idx == 48) return 15.0 / 64.0;
+        if (idx == 49) return 47.0 / 64.0;
+        if (idx == 50) return 7.0 / 64.0;
+        if (idx == 51) return 39.0 / 64.0;
+        if (idx == 52) return 13.0 / 64.0;
+        if (idx == 53) return 45.0 / 64.0;
+        if (idx == 54) return 5.0 / 64.0;
+        if (idx == 55) return 37.0 / 64.0;
+        if (idx == 56) return 63.0 / 64.0;
+        if (idx == 57) return 31.0 / 64.0;
+        if (idx == 58) return 55.0 / 64.0;
+        if (idx == 59) return 23.0 / 64.0;
+        if (idx == 60) return 61.0 / 64.0;
+        if (idx == 61) return 29.0 / 64.0;
+        if (idx == 62) return 53.0 / 64.0;
+        return 21.0 / 64.0;
+      }
+
+      mat2 rotate2D(float angle) {
+        float c = cos(angle);
+        float s = sin(angle);
+        return mat2(c, -s, s, c);
+      }
+
+      void main() {
+        vec2 uv = (gl_FragCoord.xy - 0.5 * resolution.xy) / resolution.y;
+        vec2 p = uv;
+        p += mousePos * 0.015;
+
+        float baseAngle = 0.38;
+        p = rotate2D(baseAngle) * p;
+
+        float t = time * 0.48;
+
+        float morphA = sin(tabOffset * 0.9);
+        float morphB = cos(tabOffset * 0.9);
+
+        float warp1 = sin(p.y * 2.8 + t * 0.45) * (0.18 + 0.08 * morphA);
+        float warp2 = cos(p.x * 2.2 - t * 0.35 + morphB * 0.6) * (0.15 + 0.06 * morphB);
+        vec2 q = vec2(p.x + warp1, p.y + warp2);
+
+        float h1 = sin(q.x * 2.4 + t * 0.5) * cos(q.y * 1.9 - t * 0.35);
+        float h2 = sin((q.x * 1.8 - q.y * 2.2) * 1.6 + h1 * 1.6 + t * 0.55) * 0.42;
+        float h3 = sin(q.x * 4.2 + q.y * 3.1 + h2 * 2.0 - t * 0.7) * (0.22 + 0.08 * morphA);
+        float h4 = sin(q.x * 7.0 - q.y * 5.5 + t * 0.9) * 0.08;
+        float elevation = h1 + h2 + h3 + h4;
+
+        float baseCoord = q.y * 12.0 + elevation * 3.4 + t * 0.15;
+        float f1 = fract(baseCoord);
+        float line1 = 1.0 - smoothstep(0.0, 0.09, abs(f1 - 0.5) * 2.0);
+
+        float f2 = fract(baseCoord / 3.0);
+        float lineMajor = (1.0 - smoothstep(0.0, 0.12, abs(f2 - 0.5) * 2.0)) * 0.65;
+
+        float f3 = fract(baseCoord * 2.0 + elevation * 1.2);
+        float lineMicro = (1.0 - smoothstep(0.0, 0.06, abs(f3 - 0.5) * 2.0)) * 0.28;
+
+        float contour = clamp(line1 * 0.7 + lineMajor + lineMicro, 0.0, 1.0);
+        float lum = 0.10 + 0.48 * contour + 0.18 * (elevation * 0.45 + 0.5);
+
+        float ridgeLight = smoothstep(0.4, -0.4, abs(h2));
+        lum += ridgeLight * 0.08;
+
+        vec2 screenPixel = floor(gl_FragCoord.xy / 2.0);
+        float bayer = getBayer8x8(screenPixel);
+        float dithered = smoothstep(bayer - 0.16, bayer + 0.16, lum);
+
+        vec3 darkBg = vec3(0.032, 0.036, 0.048);
+        vec3 wireColor = vec3(0.46, 0.56, 0.72) * (0.6 + 0.4 * lineMajor + 0.3 * contour);
+        vec3 finalColor = mix(darkBg, wireColor, dithered * 0.35);
+
+        float vignette = smoothstep(1.3, 0.35, length(uv));
+        finalColor = mix(vec3(0.018, 0.022, 0.028), finalColor, vignette);
+
+        gl_FragColor = vec4(finalColor, 1.0);
+      }
+    `;
+
+    function compile(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      return s;
+    }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS_SRC));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS_SRC));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const quad = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1, -1,  1, -1, -1, 1,
+      -1,  1,  1, -1,  1, 1
+    ]), gl.STATIC_DRAW);
+
+    const pos = gl.getAttribLocation(prog, 'position');
+    gl.enableVertexAttribArray(pos);
+    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'resolution');
+    const uTime = gl.getUniformLocation(prog, 'time');
+    const uMouse = gl.getUniformLocation(prog, 'mousePos');
+    const uTab = gl.getUniformLocation(prog, 'tabOffset');
+
+    let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
+    let tabVal = 0, targetTab = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      targetMouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    function setTab(idx) {
+      targetTab = idx;
+    }
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const start = performance.now();
+    function loop() {
+      const t = (performance.now() - start) / 1000;
+      tabVal += (targetTab - tabVal) * 0.05;
+      mouseX += (targetMouseX - mouseX) * 0.04;
+      mouseY += (targetMouseY - mouseY) * 0.04;
+
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, t);
+      gl.uniform2f(uMouse, mouseX, mouseY);
+      gl.uniform1f(uTab, tabVal);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>

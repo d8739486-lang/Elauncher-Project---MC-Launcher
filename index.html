@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ELauncher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Barlow+Semi+Condensed:wght@700;800;900&family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Russo+One&family=Syne:wght@700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" as="image" href="/logo.png" />
+    <link rel="preload" as="image" href="/letter_e_tight.png" />
+    <link rel="preload" as="image" href="/loaders/fabric.png" />
+    <link rel="preload" as="image" href="/loaders/neoforge.svg" />
+    <link rel="preload" as="image" href="/loaders/forge.png" />
+    <link rel="preload" as="image" href="/loaders/vanilla.svg" />
+    <script>
+      (function() {
+        // Intercept before any extensions or listeners
+        function blockEvent(e) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          return false;
+        }
+
+        // Disable right click everywhere
+        document.addEventListener('contextmenu', blockEvent, true);
+        window.addEventListener('contextmenu', blockEvent, true);
+
+        // Intercept keys via keyCode, code and key for all OS keyboard layouts (Russian & English)
+        function checkKey(e) {
+          const code = (e.code || '').toLowerCase();
+          const key = (e.key || '').toLowerCase();
+          const keyCode = e.keyCode || e.which;
+
+          // F12 (keyCode 123)
+          if (keyCode === 123 || key === 'f12' || code === 'f12') {
+            return blockEvent(e);
+          }
+
+          // Ctrl+Shift+I / J / C (Inspect / Console / Elements)
+          if ((e.ctrlKey || e.metaKey) && (e.shiftKey)) {
+            // I: keyCode 73, J: keyCode 74, C: keyCode 67
+            if (
+              keyCode === 73 || keyCode === 74 || keyCode === 67 ||
+              key === 'i' || key === 'j' || key === 'c' ||
+              key === 'ш' || key === 'о' || key === 'с' ||
+              code === 'keyi' || code === 'keyj' || code === 'keyc'
+            ) {
+              return blockEvent(e);
+            }
+          }
+
+          // Ctrl+U (keyCode 85, 'u' / 'г')
+          if ((e.ctrlKey || e.metaKey) && (keyCode === 85 || key === 'u' || key === 'г' || code === 'keyu')) {
+            return blockEvent(e);
+          }
+
+          // Ctrl+S (keyCode 83, 's' / 'ы')
+          if ((e.ctrlKey || e.metaKey) && (keyCode === 83 || key === 's' || key === 'ы' || code === 'keys')) {
+            return blockEvent(e);
+          }
+
+          // Ctrl+P (keyCode 80, 'p' / 'з')
+          if ((e.ctrlKey || e.metaKey) && (keyCode === 80 || key === 'p' || key === 'з' || code === 'keyp')) {
+            return blockEvent(e);
+          }
+        }
+
+        window.addEventListener('keydown', checkKey, true);
+        document.addEventListener('keydown', checkKey, true);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

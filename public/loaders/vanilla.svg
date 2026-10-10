@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Isometric Grass Block for Vanilla Minecraft -->
+  <!-- Top Face (Grass) -->
+  <polygon points="12,3 20,7.5 12,12 4,7.5" fill="#5C8A32" stroke="#7CB342" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Left Face (Dirt) -->
+  <polygon points="4,7.5 12,12 12,21 4,16.5" fill="#795548" stroke="#5D4037" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Right Face (Dirt) -->
+  <polygon points="12,12 20,7.5 20,16.5 12,21" fill="#5D4037" stroke="#4E342E" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Grass hanging edge over left -->
+  <path d="M4 7.5L6 8.5L7 8L9 9.5L10 9L12 10.5V12L4 7.5Z" fill="#5C8A32"/>
+  <!-- Grass hanging edge over right -->
+  <path d="M20 7.5L18 8.5L17 8L15 9.5L14 9L12 10.5V12L20 7.5Z" fill="#4C7829"/>
+</svg>

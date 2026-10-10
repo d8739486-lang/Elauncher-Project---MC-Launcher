@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" width="480" height="270">
+  <defs>
+    <linearGradient id="bg_CLASSICBETA" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#21242b"/>
+      <stop offset="100%" stop-color="#08090d"/>
+    </linearGradient>
+    <radialGradient id="glow_CLASSICBETA" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.65)"/>
+    </radialGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="480" height="270" fill="url(#bg_CLASSICBETA)"/>
+  <rect width="480" height="270" fill="url(#glow_CLASSICBETA)"/>
+  <rect width="480" height="270" fill="url(#grid)"/>
+
+  <!-- Centered Isometric Decorative Icon -->
+  <g transform="translate(240, 105)" opacity="0.9">
+    
+      <path d="M0 -38 L34 -18 L34 22 L0 42 L-34 22 L-34 -18 Z" fill="rgba(0,0,0,0.35)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+      <path d="M0 -38 L34 -18 L0 2 L-34 -18 Z" fill="rgba(255,255,255,0.18)"/>
+      <path d="M0 2 L34 -18 L34 22 L0 42 Z" fill="rgba(0,0,0,0.22)"/>
+      <path d="M0 2 L-34 -18 L-34 22 L0 42 Z" fill="rgba(0,0,0,0.45)"/>
+    
+  </g>
+
+  <!-- Typography -->
+  <g transform="translate(240, 202)">
+    <text text-anchor="middle" y="0" fill="#ffffff" font-family="'Barlow Condensed', sans-serif" font-weight="900" font-size="22" letter-spacing="2">CLASSIC / BETA</text>
+    <text text-anchor="middle" y="22" fill="rgba(255,255,255,0.72)" font-family="sans-serif" font-weight="600" font-size="12" letter-spacing="0.5">Ранние этапы игры</text>
+  </g>
+</svg>

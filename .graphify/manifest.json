@@ -1,0 +1,986 @@
+{
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/electron-main.js": {
+    "mtime": 1791469681124.763,
+    "hash": "a4f39b84211ed9dc6ccc6008e1d0d063"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/compress_previews.ps1": {
+    "mtime": 1791285446764.8574,
+    "hash": "b0e98268bf80342d3cfec3b8f8140b40"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/convert_48.ps1": {
+    "mtime": 1791282915218.0312,
+    "hash": "0c41421ac0ad483748d55a5d66759036"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/convert_ico.ps1": {
+    "mtime": 1791282553209.5945,
+    "hash": "8b41e8e3dd0b88ed756265082b905dc4"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/fetch_official_mc_textures.js": {
+    "mtime": 1791278131770.95,
+    "hash": "586a632ed9282ce55a321b13778f244e"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/fix_square_textures.js": {
+    "mtime": 1791279028904.9358,
+    "hash": "c057a9920bbd378a87ee0b3d11e7e7eb"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/generate_barlow_titles.ps1": {
+    "mtime": 1791288443583.34,
+    "hash": "610455f3f7143510be1f694397806467"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/generate_block_icons.js": {
+    "mtime": 1791277816029.9895,
+    "hash": "1fc2d883c9a7394a825e7828d69a2f9d"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/generate_title_textures.ps1": {
+    "mtime": 1791287973421.734,
+    "hash": "cc6b1ce37b2e39472ba873ad15780807"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/generate_transparent_titles.ps1": {
+    "mtime": 1791288209791.3577,
+    "hash": "98e651a0ca2672c3326cd7c59b49eef5"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/list_fonts.ps1": {
+    "mtime": 1791288377261.4187,
+    "hash": "4b638242f6177f54e311e1c3f06aeb3f"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/measure_bounds.ps1": {
+    "mtime": 1791288268620.7385,
+    "hash": "63b055b81d04d027e6f2703fc7cc41bb"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/scripts/transparent_forge.ps1": {
+    "mtime": 1791282937256.8633,
+    "hash": "5cc41388f64a01692932a21852516cab"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/shader_examples/DitherWaveCanvas.tsx": {
+    "mtime": 1791370139728.4976,
+    "hash": "40b3ef63cbcb7c1cd2a178b788f8276f"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/build.rs": {
+    "mtime": 1791179155674.963,
+    "hash": "8e6c89bd412b755ef41bd9bb191f2e31"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/src/lib.rs": {
+    "mtime": 1791179155682.364,
+    "hash": "02353b4521a91b48868b6ed725de7416"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/src/main.rs": {
+    "mtime": 1791179155682.364,
+    "hash": "a8e64e9b6bd150703cbc12bc0d188f24"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/App.tsx": {
+    "mtime": 1791469919754.144,
+    "hash": "b192a93bbb8ef5d59fd30d5cb768b26a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/components/AnimatedText.tsx": {
+    "mtime": 1791454159639.4673,
+    "hash": "c6bedb15c055d58e1da01cfa4c2e77a3"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/components/ConsoleView.tsx": {
+    "mtime": 1791458476733.443,
+    "hash": "0d9e3d81450644378e202055fcf64df7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/components/DitherWaveCanvas.tsx": {
+    "mtime": 1791454132290.1633,
+    "hash": "75161876933c104c5ebdf3faa2a0087c"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/components/InstancesView.tsx": {
+    "mtime": 1791448067010.3364,
+    "hash": "b2b925e9148f15aff8993e7d7f6b9529"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/components/ModsInstanceSelectModal.tsx": {
+    "mtime": 1791453013213.445,
+    "hash": "56c53df12045380606797fc69849d4a1"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/components/ModsView.tsx": {
+    "mtime": 1791470491107.5713,
+    "hash": "744015402d71583a6c331a6224da9639"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/components/SettingsModalContent.tsx": {
+    "mtime": 1791467372182.1328,
+    "hash": "726a3f47daa88fb7ac52bb4a67085c52"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/main.tsx": {
+    "mtime": 1791287023896.9834,
+    "hash": "6654596cabe24618ec4fc8893b85113a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/types/instance.ts": {
+    "mtime": 1791389199633.3535,
+    "hash": "bc31c92187efedfae534b0257a93e830"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/utils/i18n.ts": {
+    "mtime": 1791470346029.9607,
+    "hash": "4e11aeb15f76c8bac4ab94bd0ebe0b2a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/utils/logFilter.ts": {
+    "mtime": 1791388171257.1287,
+    "hash": "ab31befa85e34cc9779109f94ba7cfc0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/utils/modrinthService.ts": {
+    "mtime": 1791470364355.1445,
+    "hash": "b964f39fa0d7be7b540de23f8a0bd6c4"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/utils/sound.ts": {
+    "mtime": 1791300435511.8196,
+    "hash": "1e4ad651991278a5e01de043c24cb2b7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/utils/versionSync.ts": {
+    "mtime": 1791375117321.8296,
+    "hash": "d721f9602899e9de03617084925ef827"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/start": {
+    "mtime": 1791179323656.5273,
+    "hash": "7aa60daa579e426a75dc9092d84d8cd2"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/vite.config.ts": {
+    "mtime": 1791179035063.0088,
+    "hash": "844f5af05f82be907aaa0ee656d7ae33"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/Graphy.md": {
+    "mtime": 1791465794987.7253,
+    "hash": "997f3f37dadd3cccdcf5a839d955bf20"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/README.md": {
+    "mtime": 1790784274886.746,
+    "hash": "10495bfcc6c568eca4dab6dd5df795d3"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/ROADMAP.md": {
+    "mtime": 1791447216616.9453,
+    "hash": "1460b80ee48906758113f5d9fad94155"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/index.html": {
+    "mtime": 1791464132099.126,
+    "hash": "38992ad3dcbcc3f8a68ed69f8defbab2"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/shader_examples/README.md": {
+    "mtime": 1791374319622.393,
+    "hash": "331252e2b7d847b3c23a85d26edd96df"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/shader_examples/demo_topographic_dither.html": {
+    "mtime": 1791374284727.1868,
+    "hash": "820320fa5bf99cd70b280cceb45e7a5b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/вся инфа в проекте и .md файлах, а также используй skills ОБЯЗАТЕЛЬНО ВСЕ, изучи ТОЛЬКО состояние проекта и НИЧЕГО не добавляй, просто готовся.md": {
+    "mtime": 1791453714096.4666,
+    "hash": "ab266b01d1dd17bfd77390a7c1fa0e38"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/assets/icon.png": {
+    "mtime": 1791197796470.7317,
+    "hash": "6f9c1b47c1d64fe2f5bdc710d5d88f79"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/button_hover.png": {
+    "mtime": 1791205346516.121,
+    "hash": "d8ad46c799888e15bfc0861ea725dfca"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/button_normal.png": {
+    "mtime": 1791205346513.111,
+    "hash": "f42319ecdc6bd79d1bcaed047f063917"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/checkbox_off.png": {
+    "mtime": 1791205346502.0635,
+    "hash": "74548ff5123ce42b8eb9ee15e6938819"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/checkbox_on.png": {
+    "mtime": 1791205346503.5776,
+    "hash": "fa25d39b033b61153e5039953a3fdfb8"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/icon_e.png": {
+    "mtime": 1791205346500.0627,
+    "hash": "b002ae9d8804e35282a0dc80666bfd38"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/logo.png": {
+    "mtime": 1791205346485.0344,
+    "hash": "e043d577fdc416d81a21b98873d448ad"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/panel_card.png": {
+    "mtime": 1791205346511.6006,
+    "hash": "48a94c909f3a5af0b059248c25986e2e"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_banner.png": {
+    "mtime": 1791206916000,
+    "hash": "c5e13af5be69bd23d69fc4cc439fc4b4"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_banner_elauncher_project.png": {
+    "mtime": 1791289517358.3694,
+    "hash": "ecb230204e8e1fe68e8d235145f05f8b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_elauncher.png": {
+    "mtime": 1791289517354.4844,
+    "hash": "3e41a10bade2d135166cfe7746b799ad"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_elauncher_project.png": {
+    "mtime": 1791289517356.1648,
+    "hash": "9436709c2662bb2947ccc23e7398b7d8"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_elauncher_project_minecraft.png": {
+    "mtime": 1791289517357.8442,
+    "hash": "939fd04c62cc814a05aaad9209d9a000"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_eternal.png": {
+    "mtime": 1791206916000,
+    "hash": "02a4c44b5f3f533a0a769edfe7c5b1d3"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_eternal_minecraft.png": {
+    "mtime": 1791206916000,
+    "hash": "c5e13af5be69bd23d69fc4cc439fc4b4"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/textures/gui/title_minecraft.png": {
+    "mtime": 1791206916000,
+    "hash": "b76b4881d09e96ce44beb927862a8e34"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/bg-abstract.png": {
+    "mtime": 1791195966986.6313,
+    "hash": "bbd72f02ec40df58d6cd8a95f0fecf70"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/amethyst.svg": {
+    "mtime": 1791277821697.0803,
+    "hash": "633e813006a4922ce3809db83bbad3c7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/anvil.svg": {
+    "mtime": 1791277821704.1228,
+    "hash": "6b28348737ec312ab77da8afa07b31e6"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/bed.svg": {
+    "mtime": 1791277821706.1245,
+    "hash": "d9a0189beb73c4941fa35ff2e64bc47e"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/blue_ice.svg": {
+    "mtime": 1791277821707.1252,
+    "hash": "7f82d4f394a38140884037763b66e9f9"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/cherry.svg": {
+    "mtime": 1791277821695.0793,
+    "hash": "a3c0e393c6fd7ef95c14f958a442b6f7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/cobblestone.svg": {
+    "mtime": 1791277821706.1245,
+    "hash": "7f3fafa5c8b590474297fcd877d370bd"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/concrete.svg": {
+    "mtime": 1791277821700.1172,
+    "hash": "1474042cbd3aee16549e3ac4bbecc289"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/copper.svg": {
+    "mtime": 1791277821694.1023,
+    "hash": "2a8bf9801521d24d526608f168c8c38b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/deepslate.svg": {
+    "mtime": 1791277821697.0803,
+    "hash": "8c43a25b336b7a1ef227dcb0f5eda396"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/elytra.svg": {
+    "mtime": 1791277821702.1262,
+    "hash": "7689c79469343456971cebdb9aac46ac"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/emerald.svg": {
+    "mtime": 1791277821699.0798,
+    "hash": "be124890d14e1c54f4f6e4eb52ed20b9"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/emerald_block.svg": {
+    "mtime": 1791277821699.0798,
+    "hash": "ad5212c4239d8bba4f797cd24627a52a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/ender_eye.svg": {
+    "mtime": 1791277821706.1245,
+    "hash": "bc8817cb2d96e3d92b962a6cb6774c70"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/firefly.svg": {
+    "mtime": 1791277821707.1252,
+    "hash": "963df917ef6c657b1e98aed4aa1d22b4"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/grass.svg": {
+    "mtime": 1791277821703.1262,
+    "hash": "503fd16546bf5fce4f4b1bfd8f0a94ab"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/honey.svg": {
+    "mtime": 1791277821698.0796,
+    "hash": "d7efdf26cc2b19aeb36b1129022c29a7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/jungle.svg": {
+    "mtime": 1791277821705.1238,
+    "hash": "26666bd6d3b22286fe281fc908a107b5"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/mace.svg": {
+    "mtime": 1791277821695.0793,
+    "hash": "eea9720bdecc99d8d7f73af08a28a9db"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/magma.svg": {
+    "mtime": 1791277821701.1228,
+    "hash": "f6805637569a1e2943d1be7ef26890e7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/netherite.svg": {
+    "mtime": 1791277821698.0796,
+    "hash": "bafde8e788dcf1a9ffbc36e2d6891421"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/pale_heart.svg": {
+    "mtime": 1791277821707.1252,
+    "hash": "fb1429c91f8b762641b1360fc9e74412"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/piston.svg": {
+    "mtime": 1791277821705.1238,
+    "hash": "ee215387a890f49f65e2fd0d628c098a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/prismarine.svg": {
+    "mtime": 1791277821702.1262,
+    "hash": "fd56a9e5aa218d1b7d5f934222074356"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/redstone.svg": {
+    "mtime": 1791277821704.1228,
+    "hash": "40bf90bc06c0926af67a3f40067cc440"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/saddle.svg": {
+    "mtime": 1791277821703.1262,
+    "hash": "baa997edb81f4b6bae8388af3c3f6e5f"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/sculk.svg": {
+    "mtime": 1791277821696.0825,
+    "hash": "b16aaafb6374ca354e201f63c9ec97af"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/sealantern.svg": {
+    "mtime": 1791277821700.1172,
+    "hash": "0da9e34bf87f18216598c7c7eecde375"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/spear.svg": {
+    "mtime": 1791277821694.1023,
+    "hash": "fbb9391d240e08c78930f76b88696f0b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/block_icons/totem.svg": {
+    "mtime": 1791277821700.1172,
+    "hash": "5a16e72d988c6192729a8d3b7117b602"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/favicon.svg": {
+    "mtime": 1790784274894.1536,
+    "hash": "7e840862161341271697daa99a40d76b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/icons.svg": {
+    "mtime": 1790784274895.1533,
+    "hash": "3b4fcfcf393eca4d264dca4a4663bc37"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/letter_e.png": {
+    "mtime": 1791201711458.5933,
+    "hash": "80b331aa11dbf22dd1483673d7cfe276"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/letter_e_aligned.png": {
+    "mtime": 1791201923812.2976,
+    "hash": "43fea2d29546a9acb435069295f1dd91"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/letter_e_tight.png": {
+    "mtime": 1791202142942.5813,
+    "hash": "93a19aab0802b9fd97eb8a64730a4eed"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/loaders/fabric.png": {
+    "mtime": 1791282422095.9402,
+    "hash": "4459f7cc8eda42268bea7ee42b07df87"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/loaders/fabric.svg": {
+    "mtime": 1791281397178.454,
+    "hash": "599b8cea897b7bdb8b9d7786f1fee17a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/loaders/fabric_site.png": {
+    "mtime": 1791282422095.9402,
+    "hash": "4459f7cc8eda42268bea7ee42b07df87"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/loaders/forge.png": {
+    "mtime": 1791282957965.9446,
+    "hash": "cb2cfcc239c87e7f2d1fe8b7ba6a74d6"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/loaders/neoforge.png": {
+    "mtime": 1791282182046.2373,
+    "hash": "4a10a350fbf466d61c00d5ca35c6e82c"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/loaders/neoforge.svg": {
+    "mtime": 1791282363154.3247,
+    "hash": "2456843785e0ffd3004fad6ce30b2e56"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/loaders/vanilla.svg": {
+    "mtime": 1791281422603.3906,
+    "hash": "fc4be31b9fd0c252f202fd79579a94d3"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/logo.png": {
+    "mtime": 1791197796447.5151,
+    "hash": "6f9c1b47c1d64fe2f5bdc710d5d88f79"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/amethyst_block.png": {
+    "mtime": 1791278141341.0215,
+    "hash": "d5f0af76c25a970a8fef1cf516395e36"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/amethyst_cluster.png": {
+    "mtime": 1791278141722.621,
+    "hash": "7854ea8f6608d64f7e1f0a7a2ac06a84"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/anvil.png": {
+    "mtime": 1791278146622.9028,
+    "hash": "f4855c564eeb5ec47a0aa4ece4f85a92"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/barrier.png": {
+    "mtime": 1791279386057.9185,
+    "hash": "fe169992ffa8f22d0a84c88ce1867290"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/blue_ice.png": {
+    "mtime": 1791278148332.7974,
+    "hash": "7e03e4e2bcb975e1d9b39e588ba42afb"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/bow.png": {
+    "mtime": 1791279589020.9155,
+    "hash": "68b85ce35ddfca6763a8fe952e9ffbc8"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/brick.png": {
+    "mtime": 1791279589312.045,
+    "hash": "0283a3744e14175c070432837d8cf934"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/bundle.png": {
+    "mtime": 1791279386307.6106,
+    "hash": "eb61ae38ff8f1f8e5d369548c9a961a4"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/cherry_leaves.png": {
+    "mtime": 1791278140169.8247,
+    "hash": "bc2051885592ac5488665a0fdb8960a2"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/clock.png": {
+    "mtime": 1791279588065.768,
+    "hash": "225847b32cfe5be315bc624f6e892be1"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/cobblestone.png": {
+    "mtime": 1791278148036.8552,
+    "hash": "41aa8c5f80ecf78cd5104603a0af304e"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/command_block.png": {
+    "mtime": 1791368500112.6365,
+    "hash": "66a5f06aa7c796d03c25c46ea55b516a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/compass.png": {
+    "mtime": 1791279588675.4802,
+    "hash": "d472ba1e46ba62c1004296facf380ab6"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/copper_block.png": {
+    "mtime": 1791278139298.9922,
+    "hash": "765ce7e466cd5cd2a96ea14db0a1ba7b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/copper_bulb.png": {
+    "mtime": 1791278139612.7192,
+    "hash": "1a4044ed21d565ae0933b9efb9e3e8c7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/creaking_heart.png": {
+    "mtime": 1791278139892.9812,
+    "hash": "233dde07e6206f32474f5906535956e7"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/cyan_concrete.png": {
+    "mtime": 1791278143760.112,
+    "hash": "7d6b7d6ebbcdef22ce6c3784ebd24391"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/cyan_dye.png": {
+    "mtime": 1791279038347.5261,
+    "hash": "d788bf2aa4297fcad09c7fe0b37e33a2"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/deepslate.png": {
+    "mtime": 1791278141091.9878,
+    "hash": "8e16b4054fe647410e2ee0ae8b980338"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/diamond_pickaxe.png": {
+    "mtime": 1791278148860.3494,
+    "hash": "f545aea369dffe779f847925ade41a98"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/diamond_sword.png": {
+    "mtime": 1791278148602.8154,
+    "hash": "8838a90bec6b6c04bb60006aaa6a68b9"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/dirt.png": {
+    "mtime": 1791279388051.8577,
+    "hash": "18c32f5519dd39ba3827f5e2f5aac404"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/elytra.png": {
+    "mtime": 1791278144867.2607,
+    "hash": "140b68a89fccf5deadd46bbc9fc1d725"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/emerald.png": {
+    "mtime": 1791278142879.8147,
+    "hash": "b2b9eaef584977e617bdc034e863e776"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/emerald_block.png": {
+    "mtime": 1791278143129.6665,
+    "hash": "6d1ed201630d2891fc047f2bb58a146d"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/ender_eye.png": {
+    "mtime": 1791278147196.5793,
+    "hash": "d1a31f7138f97eb7dff83dd1811807f3"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/fence.png": {
+    "mtime": 1791278146928.7588,
+    "hash": "6849e802cd9256b388c9eaee45c25c85"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/glazed_terracotta.png": {
+    "mtime": 1791279038051.3372,
+    "hash": "b5f497260125c01e4db86af8f855f9bb"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/gold_block.png": {
+    "mtime": 1791279387749.9966,
+    "hash": "9ac731894451a4f745bbc4b38f839a31"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/golden_apple.png": {
+    "mtime": 1791279588374.5254,
+    "hash": "2f86819274c54b96c538377c7fcef807"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/grass_block.png": {
+    "mtime": 1791278145439.082,
+    "hash": "e0a662f683c6b95f592fe1f7e0e5ae37"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/heart_of_the_sea.png": {
+    "mtime": 1791279037506.5317,
+    "hash": "7f88e20ca73666edde9b4e87033a0aac"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/honey_block.png": {
+    "mtime": 1791278142327.4773,
+    "hash": "d15d9301ed141810d6bb1b2113155523"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/honeycomb_block.png": {
+    "mtime": 1791278142616.4714,
+    "hash": "c6e702bcbd0287d439be5b89dcd871c8"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/iron_block.png": {
+    "mtime": 1791279387463.2664,
+    "hash": "0bdc7730a776e9e1483221df6d9e66a9"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/jungle_log.png": {
+    "mtime": 1791278146928.7588,
+    "hash": "6849e802cd9256b388c9eaee45c25c85"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/mace.png": {
+    "mtime": 1791278138993.0647,
+    "hash": "946dea7ab574fef19062e4738ecfb5ff"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/magenta_glazed_terracotta.png": {
+    "mtime": 1791278144068.228,
+    "hash": "b5f497260125c01e4db86af8f855f9bb"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/magma.png": {
+    "mtime": 1791279036631.3198,
+    "hash": "f5da530fd5311b1a6a3100bdbfb1929b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/netherite_block.png": {
+    "mtime": 1791278142044.8623,
+    "hash": "63c783b19a1c7a2ba594fe9850b646a2"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/piston.png": {
+    "mtime": 1791278147476.8374,
+    "hash": "7c0aacd21baedb2b61b29320ba3c7cee"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/piston_top.png": {
+    "mtime": 1791278147732.9038,
+    "hash": "3e8017cea8a78f23c489b5083edb4df9"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/poisonous_potato.png": {
+    "mtime": 1791279385133.5095,
+    "hash": "c19b02230cdc35e50d11a71c5436a691"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/prismarine.png": {
+    "mtime": 1791279036960.0166,
+    "hash": "873103cef116825681f13938833a4ba3"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/prismarine_shard.png": {
+    "mtime": 1791279037218.5854,
+    "hash": "418221893432912577041dbf54a3dcb5"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/redstone.png": {
+    "mtime": 1791278146019.8384,
+    "hash": "d625e2555b97bed98bc8f5de7cd61f75"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/redstone_block.png": {
+    "mtime": 1791278146313.3296,
+    "hash": "0d55731c14d467a9d84a4ed368cc248c"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/redstone_torch.png": {
+    "mtime": 1791279386883.075,
+    "hash": "41ca77511158b07f2639ab003c67308a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/saddle.png": {
+    "mtime": 1791278145748.8938,
+    "hash": "750e4c5df61b79aa59f046c258d043d1"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/sculk.png": {
+    "mtime": 1791279036335.6104,
+    "hash": "397347268e62e743cc6e181e1471cb77"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/sculk_catalyst.png": {
+    "mtime": 1791278140751.9119,
+    "hash": "397347268e62e743cc6e181e1471cb77"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/sea_lantern.png": {
+    "mtime": 1791279055098.3103,
+    "hash": "7f88e20ca73666edde9b4e87033a0aac"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/spear.png": {
+    "mtime": 1791278138737.9124,
+    "hash": "4237b3550b345e130f2b1df11e527c9f"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/sponge.png": {
+    "mtime": 1791279387188.2954,
+    "hash": "f0e449aa55b79598d5660119f36dd9d5"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/structure_block.png": {
+    "mtime": 1791279385797.5498,
+    "hash": "09c85ab50d1b93d62795a6a3d3e387ef"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/tnt.png": {
+    "mtime": 1791279388348.205,
+    "hash": "6928f08c90082a2b763c45496f44edea"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/totem_of_undying.png": {
+    "mtime": 1791278144317.877,
+    "hash": "8ce24751a3e942e74f4073167c6d43f1"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/trident.png": {
+    "mtime": 1791279037801.1987,
+    "hash": "f8691308abbd11deaea229db73891dfd"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/minecraft_textures/writable_book.png": {
+    "mtime": 1791279386612.3296,
+    "hash": "1687e3e258e7b0ed4c6632cf03c6dc77"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_campfire.jpg": {
+    "mtime": 1791285454685.9666,
+    "hash": "2f062f30aa9b1f78ee044c642379e16c"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_cherry.jpg": {
+    "mtime": 1791285454743.8945,
+    "hash": "e4a3177a3fd13ccd80f89feaf7df5f2a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_copper.jpg": {
+    "mtime": 1791285454786.834,
+    "hash": "163cf1ae0bf2d13a7e701a7da887f6b0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_deepdark.jpg": {
+    "mtime": 1791285454836.8884,
+    "hash": "1d12cfe5f96e77c10e623ec0109cbc90"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_default.png": {
+    "mtime": 1791209955088.84,
+    "hash": "59a947775859c9ea2498709c5a752198"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_icecaves.jpg": {
+    "mtime": 1791285454885.1755,
+    "hash": "fc89370cf21ba8159b4de7379dcf5801"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_palegarden.jpg": {
+    "mtime": 1791285454923.9602,
+    "hash": "c289062c95b3b352141222872c6cc301"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/previews/preset_portal.jpg": {
+    "mtime": 1791285454959.3894,
+    "hash": "f89863a9268b2349f590dde86d954419"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/1_21_5.png": {
+    "mtime": 1791205894857.484,
+    "hash": "6f782b62cedbe2c92de626ba8b6e16ca"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_12.svg": {
+    "mtime": 1791210633681.5603,
+    "hash": "d8c7cf6fd6be89930607ed9c1baae200"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_13.svg": {
+    "mtime": 1791210633680.552,
+    "hash": "b3d93f713a589b8e96a9a3efb43a2f83"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_14.svg": {
+    "mtime": 1791210633680.552,
+    "hash": "820ae8e9fdf713c1acce5fcae716b2e1"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_15.svg": {
+    "mtime": 1791210633679.8035,
+    "hash": "4a91d0daa4b43f6376a3309fe6aad0b5"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_16.svg": {
+    "mtime": 1791210633679.8035,
+    "hash": "0ec7c18b18f2768766c7237832d3a52b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_17.svg": {
+    "mtime": 1791210633678.788,
+    "hash": "3547f977b69295223c81f2b90c744b82"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_18.svg": {
+    "mtime": 1791210633678.2666,
+    "hash": "f82ee12c2cb5a97b1f2dbd3ce747ef44"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_19.svg": {
+    "mtime": 1791210633677.242,
+    "hash": "66265835207c1f6ec159c2084a820b3f"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_20.svg": {
+    "mtime": 1791210633676.2314,
+    "hash": "25a9e77cf5d3fa998698c3cf13b54d6b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_21.svg": {
+    "mtime": 1791210633674.3813,
+    "hash": "edad25925b465bbd89a2643c0fb4e968"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_21_11.svg": {
+    "mtime": 1791210633670.831,
+    "hash": "ec5c121e1f9def4a23550936b52e5ca8"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_21_4.svg": {
+    "mtime": 1791210633673.391,
+    "hash": "66f58d581049087b4b43a352f1de8c06"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_21_6.svg": {
+    "mtime": 1791210633672.365,
+    "hash": "9da2dacdc176afce38b60b0790edff31"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_21_9.svg": {
+    "mtime": 1791210633670.831,
+    "hash": "e31802c7039b71c1eb6b1cdaa9f03b15"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_7.svg": {
+    "mtime": 1791210633682.936,
+    "hash": "dae783e3aec2ab14aff6a77f49e93acb"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_1_8.svg": {
+    "mtime": 1791210633681.5603,
+    "hash": "a498f1b2b5a531edd58bf74c8d11fb62"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_26_1.svg": {
+    "mtime": 1791210633669.0781,
+    "hash": "40056e266812596b78e499d363f64831"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_26_2.svg": {
+    "mtime": 1791210633668.0847,
+    "hash": "3e5f15972de08e7efcc7230f3d577bbd"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_26_3.svg": {
+    "mtime": 1791210633667.067,
+    "hash": "b64d984b30c7daaf8f99900de0d0f4d0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_26_4.svg": {
+    "mtime": 1791210633665.5632,
+    "hash": "c6c6db36ac47f882265c3a990bcb78be"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/version_covers/cover_classic.svg": {
+    "mtime": 1791210633682.936,
+    "hash": "95df2e19253bb821ce0221fd3ab36fc9"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/shader_examples/image copy.png": {
+    "mtime": 1791374348104.3997,
+    "hash": "9808bab6d0f9af3bc217c51323025cc6"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/shader_examples/image.png": {
+    "mtime": 1791374342269.637,
+    "hash": "f2dda7c57af4f982827d853214be1f4a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/shader_examples/Снимок экрана 2026-10-06 185111.png": {
+    "mtime": 1791291072404.8582,
+    "hash": "55fc7878f6a8e32f79a7d51414278705"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/shader_examples/Снимок экрана 2026-10-06 185122.png": {
+    "mtime": 1791291082791.8892,
+    "hash": "588a919001fd6d9744cbfab45698e111"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/128x128.png": {
+    "mtime": 1791179164978.1326,
+    "hash": "8d880a5838e0797c2f39a057a7dee090"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/128x128@2x.png": {
+    "mtime": 1791179165025.593,
+    "hash": "83d070e7f58453e36334a50fcc0fd33a"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/32x32.png": {
+    "mtime": 1791179164919.9136,
+    "hash": "e5e951670b1dec2b1e7533e00ec8cb5e"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/64x64.png": {
+    "mtime": 1791179164944.9348,
+    "hash": "3c5ee9b7f3e038be180771257939a1b6"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square107x107Logo.png": {
+    "mtime": 1791179163872.235,
+    "hash": "2114899c204726eb6d23cee87706c0d6"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square142x142Logo.png": {
+    "mtime": 1791179163901.5369,
+    "hash": "216b02ef61e733829d5b2d6866fb461b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square150x150Logo.png": {
+    "mtime": 1791179163931.7632,
+    "hash": "afb3db249f2c8806c952b92f84641710"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square284x284Logo.png": {
+    "mtime": 1791179163989.0078,
+    "hash": "eb54fe1c321abc55a472e294e2221da3"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square30x30Logo.png": {
+    "mtime": 1791179163780.903,
+    "hash": "87d237637ba4e7db30f07c783f277a35"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square310x310Logo.png": {
+    "mtime": 1791179164063.407,
+    "hash": "f9485074228beeed609d5d22e35387ce"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square44x44Logo.png": {
+    "mtime": 1791179163800.745,
+    "hash": "bedf7f2547928e1f7496f61f7599a85d"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square71x71Logo.png": {
+    "mtime": 1791179163824.5415,
+    "hash": "ad9347a2ca569feb0f6a54254d09fec2"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/Square89x89Logo.png": {
+    "mtime": 1791179163848.1196,
+    "hash": "1985f2784082cb1f7064231593aa786c"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/StoreLogo.png": {
+    "mtime": 1791179163762.489,
+    "hash": "a881b85df6e10bb08cb3e6789fbee848"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-hdpi/ic_launcher.png": {
+    "mtime": 1791179166128.1064,
+    "hash": "e7349d40c5022e0df4309b4264e95369"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-hdpi/ic_launcher_foreground.png": {
+    "mtime": 1791179165812.5437,
+    "hash": "9fe7d54091df6e3a1f875f520b479586"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-hdpi/ic_launcher_round.png": {
+    "mtime": 1791179166102.9497,
+    "hash": "42043f52a4b85ada5101dfe28cd85a84"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-mdpi/ic_launcher.png": {
+    "mtime": 1791179166175.6658,
+    "hash": "f70862c6c88b49cfc0ea140c94806ca5"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-mdpi/ic_launcher_foreground.png": {
+    "mtime": 1791179165839.7422,
+    "hash": "297957f309ccee289443d6ab23002aab"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-mdpi/ic_launcher_round.png": {
+    "mtime": 1791179166151.0596,
+    "hash": "d1b62aec63d82ff25f21353dd51384e0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xhdpi/ic_launcher.png": {
+    "mtime": 1791179166233.833,
+    "hash": "f8eeb1b53c2cae01675d1969595ad2e4"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xhdpi/ic_launcher_foreground.png": {
+    "mtime": 1791179165885.175,
+    "hash": "747a3488a671c98b8cfae776fc301595"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xhdpi/ic_launcher_round.png": {
+    "mtime": 1791179166204.0083,
+    "hash": "dc6782be2a2d0863fc1f8ecf34466631"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xxhdpi/ic_launcher.png": {
+    "mtime": 1791179166294.8877,
+    "hash": "7fdf5a5e21a1cb1aa3eb3a5fe39e3e4c"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_foreground.png": {
+    "mtime": 1791179165966.9485,
+    "hash": "87db0ae2cadbee4901f52d73935c0045"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_round.png": {
+    "mtime": 1791179166265.028,
+    "hash": "2f41f7a4b8e943f050b27092547ef557"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher.png": {
+    "mtime": 1791179166372.522,
+    "hash": "eed42b7509cfb0e2cdb36203605e9a80"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_foreground.png": {
+    "mtime": 1791179166075.2766,
+    "hash": "0dc1c162a8669025dda7b3026a14ac00"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_round.png": {
+    "mtime": 1791179166331.017,
+    "hash": "c0936268820b0e7fdff38e068428d647"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/icon.png": {
+    "mtime": 1791179165136.8022,
+    "hash": "c8161433623abf1b0d6f6ee2f3fc74d2"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-20x20@1x.png": {
+    "mtime": 1791179165190.8438,
+    "hash": "e1d9b8234761a2a92460d6b2b21382b0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-20x20@2x-1.png": {
+    "mtime": 1791179165163.3406,
+    "hash": "77c51a5670f1097a490c288ec237cd80"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-20x20@2x.png": {
+    "mtime": 1791179165217.495,
+    "hash": "77c51a5670f1097a490c288ec237cd80"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-20x20@3x.png": {
+    "mtime": 1791179165239.4558,
+    "hash": "12c3a7181c91741c4388dd6293c39405"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-29x29@1x.png": {
+    "mtime": 1791179165277.9807,
+    "hash": "5b17019139331999310e3206bc36f1c0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-29x29@2x-1.png": {
+    "mtime": 1791179165259.0012,
+    "hash": "3067cb6e2b1c4f174020497d1588156b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-29x29@2x.png": {
+    "mtime": 1791179165299.2786,
+    "hash": "3067cb6e2b1c4f174020497d1588156b"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-29x29@3x.png": {
+    "mtime": 1791179165322.767,
+    "hash": "34dd87cdb4b62aca30417abf7f21cbdb"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-40x40@1x.png": {
+    "mtime": 1791179165363.7961,
+    "hash": "77c51a5670f1097a490c288ec237cd80"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-40x40@2x-1.png": {
+    "mtime": 1791179165344.0144,
+    "hash": "1c1c4cf59bb5a9ceda65df76cf4759db"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-40x40@2x.png": {
+    "mtime": 1791179165385.052,
+    "hash": "1c1c4cf59bb5a9ceda65df76cf4759db"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-40x40@3x.png": {
+    "mtime": 1791179165413.2974,
+    "hash": "34a91cf0d4048048c3d6c245a08c9fc0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-512@2x.png": {
+    "mtime": 1791179165759.035,
+    "hash": "b5a7664813320c677a190331827c662d"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-60x60@2x.png": {
+    "mtime": 1791179165441.117,
+    "hash": "34a91cf0d4048048c3d6c245a08c9fc0"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-60x60@3x.png": {
+    "mtime": 1791179165477.1138,
+    "hash": "499543d6a0b8acf6523c2c4d471d01c9"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-76x76@1x.png": {
+    "mtime": 1791179165497.736,
+    "hash": "13c045459f04dbe2625a9ba88a612c19"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-76x76@2x.png": {
+    "mtime": 1791179165529.1245,
+    "hash": "fa4a4c37d9fcdf5d711db7c84c84321f"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src-tauri/icons/ios/AppIcon-83.5x83.5@2x.png": {
+    "mtime": 1791179165564.5283,
+    "hash": "76eb37f60e32ca668082e12eef01b5a5"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/assets/hero.png": {
+    "mtime": 1790784274902.2249,
+    "hash": "aead493361b27e7510691c5d7072dfc1"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/assets/react.svg": {
+    "mtime": 1790784274903.224,
+    "hash": "f0402b67b6ce880f65666bb49e841696"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/src/assets/vite.svg": {
+    "mtime": 1790784274905.2246,
+    "hash": "9960a24288958394ac50e57ff638b036"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/mod_assets/sounds/click.wav": {
+    "mtime": 1791205405811.3618,
+    "hash": "9f3f9e699c76784a7ee210799db85430"
+  },
+  "C:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/public/click.wav": {
+    "mtime": 1791204066281.1958,
+    "hash": "9f3f9e699c76784a7ee210799db85430"
+  }
+}

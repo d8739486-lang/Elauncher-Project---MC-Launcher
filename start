@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo "Launching Eternal Launcher Desktop Application..."
+npm start
