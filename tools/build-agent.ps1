@@ -3,13 +3,19 @@ $javac = "$javaBin\javac.exe"
 $jar = "$javaBin\jar.exe"
 
 $cp = (
-  "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\ow2\asm\asm\9.10.1\asm-9.10.1.jar;" +
-  "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\ow2\asm\asm-commons\9.10.1\asm-commons-9.10.1.jar;" +
-  "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\ow2\asm\asm-tree\9.10.1\asm-tree-9.10.1.jar;" +
-  "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\lwjgl\lwjgl\3.3.3\lwjgl-3.3.3.jar;" +
-  "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\lwjgl\lwjgl-opengl\3.3.3\lwjgl-opengl-3.3.3.jar;" +
-  "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\lwjgl\lwjgl-glfw\3.3.3\lwjgl-glfw-3.3.3.jar"
+  "tools\agent\lib\asm-9.10.1.jar;" +
+  "tools\agent\lib\asm-commons-9.10.1.jar;" +
+  "tools\agent\lib\asm-tree-9.10.1.jar;" +
+  "tools\agent\lib\lwjgl-3.3.3.jar;" +
+  "tools\agent\lib\lwjgl-opengl-3.3.3.jar;" +
+  "tools\agent\lib\lwjgl-glfw-3.3.3.jar"
 )
+
+# Clean classes directory to avoid leftover module-info from ASM jar unpacking
+if (Test-Path "tools\agent\classes") {
+  Remove-Item -Recurse -Force "tools\agent\classes"
+}
+New-Item -ItemType Directory -Force -Path "tools\agent\classes" | Out-Null
 
 Write-Host "Compiling Java files..."
 & $javac -cp $cp -d "tools\agent\classes" "tools\agent\src\com\eternal\launcher\agent\ShaderRenderer.java" "tools\agent\src\com\eternal\launcher\agent\BackgroundAgent.java"
@@ -23,10 +29,11 @@ Write-Host "Compilation successful. Creating JAR..."
 
 # Unpack ASM into classes so the agent is completely self-contained!
 Set-Location "tools\agent\classes"
-& $jar -xf "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\ow2\asm\asm\9.10.1\asm-9.10.1.jar"
-& $jar -xf "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\ow2\asm\asm-commons\9.10.1\asm-commons-9.10.1.jar"
-& $jar -xf "C:\Users\zshaf\AppData\Roaming\.minecraft\libraries\org\ow2\asm\asm-tree\9.10.1\asm-tree-9.10.1.jar"
+& $jar -xf "..\..\..\tools\agent\lib\asm-9.10.1.jar"
+& $jar -xf "..\..\..\tools\agent\lib\asm-commons-9.10.1.jar"
+& $jar -xf "..\..\..\tools\agent\lib\asm-tree-9.10.1.jar"
 Remove-Item -Recurse -Force "META-INF" -ErrorAction SilentlyContinue
+Remove-Item -Force "module-info.class" -ErrorAction SilentlyContinue
 Set-Location "..\..\.."
 
 # Write MANIFEST.MF

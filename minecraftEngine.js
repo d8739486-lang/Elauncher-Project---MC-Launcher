@@ -1315,11 +1315,23 @@ export function syncGlobalOptionsBeforeLaunch({ instancesPath, instanceDir }) {
     if (!fs.existsSync(targetOpt)) {
       if (fs.existsSync(sharedPath)) {
         fs.copyFileSync(sharedPath, targetOpt);
+      } else {
+        fs.writeFileSync(targetOpt, 'fullscreen:true\n', 'utf8');
       }
-      return;
     }
 
-    // 3. If instance already has options.txt, merge preferences from shared_options.txt
+    // 3. Ensure fullscreen:true is set in target options.txt
+    try {
+      let optContent = fs.existsSync(targetOpt) ? fs.readFileSync(targetOpt, 'utf8') : '';
+      if (optContent.includes('fullscreen:')) {
+        optContent = optContent.replace(/fullscreen:\s*(?:false|true)/g, 'fullscreen:true');
+      } else {
+        optContent += '\nfullscreen:true\n';
+      }
+      fs.writeFileSync(targetOpt, optContent, 'utf8');
+    } catch {}
+
+    // 4. If instance already has options.txt, merge preferences from shared_options.txt
     if (fs.existsSync(sharedPath) && fs.existsSync(targetOpt)) {
       const sharedContent = fs.readFileSync(sharedPath, 'utf8');
       const targetContent = fs.readFileSync(targetOpt, 'utf8');
@@ -1651,6 +1663,9 @@ export async function launchMinecraftProcess(
   };
 
   const gameArgs = resolveMinecraftGameArguments(combinedProfileData, templateVars);
+  if (!gameArgs.includes('--fullscreen')) {
+    gameArgs.push('--fullscreen');
+  }
 
   onLog({
     raw: `[LAUNCHER] Запуск процесса: ${javaExe}`,

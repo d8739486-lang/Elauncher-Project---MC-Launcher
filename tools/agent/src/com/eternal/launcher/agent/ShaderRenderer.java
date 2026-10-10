@@ -23,6 +23,7 @@ public class ShaderRenderer {
     private static int uMousePos = -1;
 
     private static long startTime = System.currentTimeMillis();
+    private static boolean windowConfigured = false;
 
     private static final String VERTEX_SHADER = """
         #version 330 core
@@ -261,10 +262,24 @@ public class ShaderRenderer {
         if (!initGL()) return false;
 
         try {
+            long window = GLFW.glfwGetCurrentContext();
+
+            // Ensure window is always on top (GLFW_FLOATING) and focused upon first render
+            if (!windowConfigured && window != 0) {
+                try {
+                    GLFW.glfwSetWindowAttrib(window, GLFW.GLFW_FLOATING, GLFW.GLFW_TRUE);
+                    GLFW.glfwShowWindow(window);
+                    GLFW.glfwFocusWindow(window);
+                    windowConfigured = true;
+                    System.out.println("[ELauncher Agent] Window set to always on top (GLFW_FLOATING) and focused!");
+                } catch (Throwable t) {
+                    System.err.println("[ELauncher Agent] Could not set GLFW_FLOATING: " + t);
+                }
+            }
+
             // Read mouse position if GLFW context is present
             double mouseX = 0.0;
             double mouseY = 0.0;
-            long window = GLFW.glfwGetCurrentContext();
             if (window != 0) {
                 double[] mx = new double[1];
                 double[] my = new double[1];
