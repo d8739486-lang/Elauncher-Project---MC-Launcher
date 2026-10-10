@@ -3,15 +3,13 @@ $javac = "$javaBin\javac.exe"
 $jar = "$javaBin\jar.exe"
 
 $cp = (
-  "tools\agent\lib\asm-9.10.1.jar;" +
-  "tools\agent\lib\asm-commons-9.10.1.jar;" +
-  "tools\agent\lib\asm-tree-9.10.1.jar;" +
+  "tools\agent\lib\relocated-asm.jar;" +
   "tools\agent\lib\lwjgl-3.3.3.jar;" +
   "tools\agent\lib\lwjgl-opengl-3.3.3.jar;" +
   "tools\agent\lib\lwjgl-glfw-3.3.3.jar"
 )
 
-# Clean classes directory to avoid leftover module-info from ASM jar unpacking
+# Clean classes directory to avoid leftover classes
 if (Test-Path "tools\agent\classes") {
   Remove-Item -Recurse -Force "tools\agent\classes"
 }
@@ -25,13 +23,11 @@ if ($LASTEXITCODE -ne 0) {
   exit $LASTEXITCODE
 }
 
-Write-Host "Compilation successful. Creating JAR..."
+Write-Host "Compilation successful. Unpacking relocated ASM..."
 
-# Unpack ASM into classes so the agent is completely self-contained!
+# Unpack relocated-asm into classes directory so agent is self-contained with zero external dependencies
 Set-Location "tools\agent\classes"
-& $jar -xf "..\..\..\tools\agent\lib\asm-9.10.1.jar"
-& $jar -xf "..\..\..\tools\agent\lib\asm-commons-9.10.1.jar"
-& $jar -xf "..\..\..\tools\agent\lib\asm-tree-9.10.1.jar"
+& $jar -xf "..\..\..\tools\agent\lib\relocated-asm.jar"
 Remove-Item -Recurse -Force "META-INF" -ErrorAction SilentlyContinue
 Remove-Item -Force "module-info.class" -ErrorAction SilentlyContinue
 Set-Location "..\..\.."
@@ -40,6 +36,7 @@ Set-Location "..\..\.."
 $manifestContent = @"
 Manifest-Version: 1.0
 Premain-Class: com.eternal.launcher.agent.BackgroundAgent
+Boot-Class-Path: elauncher-bg.jar
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 

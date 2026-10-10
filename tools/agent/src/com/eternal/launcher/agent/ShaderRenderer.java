@@ -263,18 +263,8 @@ public class ShaderRenderer {
 
         try {
             long window = GLFW.glfwGetCurrentContext();
-
-            // Ensure window is always on top (GLFW_FLOATING) and focused upon first render
             if (!windowConfigured && window != 0) {
-                try {
-                    GLFW.glfwSetWindowAttrib(window, GLFW.GLFW_FLOATING, GLFW.GLFW_TRUE);
-                    GLFW.glfwShowWindow(window);
-                    GLFW.glfwFocusWindow(window);
-                    windowConfigured = true;
-                    System.out.println("[ELauncher Agent] Window set to always on top (GLFW_FLOATING) and focused!");
-                } catch (Throwable t) {
-                    System.err.println("[ELauncher Agent] Could not set GLFW_FLOATING: " + t);
-                }
+                windowConfigured = true;
             }
 
             // Read mouse position if GLFW context is present

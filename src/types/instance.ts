@@ -1,4 +1,4 @@
-export type ModLoader = 'Fabric' | 'Forge' | 'NeoForge' | 'Vanilla';
+export type ModLoader = 'Fabric' | 'Forge' | 'NeoForge' | 'Vanilla' | 'ELauncher';
 
 export interface Instance {
   id: string;
@@ -360,9 +360,14 @@ export const VERSION_GROUPS: VersionGroup[] = [
 
 export const ALL_VERSION_ITEMS: VersionItem[] = VERSION_GROUPS.flatMap((g) => g.items);
 
-export const MOD_LOADERS: ModLoader[] = ['Fabric', 'Forge', 'NeoForge', 'Vanilla'];
+export const MOD_LOADERS: ModLoader[] = ['Fabric', 'Forge', 'NeoForge', 'Vanilla', 'ELauncher'];
 
 export const LOADER_METADATA: Record<ModLoader, { name: string; icon: string; brandColor: string }> = {
+  ELauncher: {
+    name: 'ELauncher',
+    icon: '/loaders/elauncher.png',
+    brandColor: '#38bdf8',
+  },
   NeoForge: {
     name: 'NeoForge',
     icon: '/loaders/neoforge.svg',
@@ -387,18 +392,18 @@ export const LOADER_METADATA: Record<ModLoader, { name: string; icon: string; br
 
 /**
  * Returns the list of mod loaders supported by the given version:
- * - ALL Snapshots, Release Candidates, Pre-releases, April Fools, Combat Tests: ONLY Vanilla! (No Fabric, no Forge, no NeoForge).
- * - Ancient builds (Beta, Alpha, Infdev, Classic): ONLY Vanilla!
- * - 1.2.5 – 1.12.2: Forge & Vanilla.
- * - 1.14 – 1.20.1: Fabric, Forge, Vanilla.
- * - 1.20.2 – 1.21.x: Fabric, NeoForge, Forge, Vanilla.
- * - 2026 Drops: Fabric, NeoForge, Forge, Vanilla.
+ * - ELauncher is available everywhere as our custom enhanced launcher runtime.
+ * - ALL Snapshots, Release Candidates, Pre-releases, April Fools, Combat Tests: Vanilla & ELauncher.
+ * - Ancient builds (Beta, Alpha, Infdev, Classic): Vanilla & ELauncher.
+ * - 1.2.5 – 1.12.2: Forge, Vanilla, ELauncher.
+ * - 1.14 – 1.20.1: Fabric, Forge, Vanilla, ELauncher.
+ * - 1.20.2 – 1.21.x: Fabric, NeoForge, Forge, Vanilla, ELauncher.
+ * - 2026 Drops: Fabric, NeoForge, Forge, Vanilla, ELauncher.
  */
 export function getSupportedLoaders(versionId: string, category: VersionTypeCategory): ModLoader[] {
-  // На любых снапшотах, пре-релизах, экспериментах и древних версиях — СТРОГО только чистая Vanilla!
-  // Никаких Fabric, Forge, NeoForge на снапшотах нет.
+  // На любых снапшотах, пре-релизах, экспериментах и древних версиях — Vanilla и ELauncher
   if (category === 'snapshot' || category === 'ancient') {
-    return ['Vanilla'];
+    return ['Vanilla', 'ELauncher'];
   }
 
   const isSpecialOrSnapshot =
@@ -416,42 +421,42 @@ export function getSupportedLoaders(versionId: string, category: VersionTypeCate
     versionId.toLowerCase().includes('minecraft 2.0');
 
   if (isSpecialOrSnapshot) {
-    return ['Vanilla'];
+    return ['Vanilla', 'ELauncher'];
   }
 
-  // 2026 Drops (26.x): Fabric, NeoForge, Vanilla
+  // 2026 Drops (26.x): Fabric, NeoForge, Vanilla, ELauncher
   if (versionId.startsWith('26.')) {
-    return ['Fabric', 'NeoForge', 'Vanilla'];
+    return ['Fabric', 'NeoForge', 'Vanilla', 'ELauncher'];
   }
 
-  // Линейка 1.21.x: Fabric, NeoForge, Vanilla (Forge на 1.21 вытеснен NeoForge)
+  // Линейка 1.21.x: Fabric, NeoForge, Vanilla, ELauncher
   if (versionId.startsWith('1.21')) {
-    return ['Fabric', 'NeoForge', 'Vanilla'];
+    return ['Fabric', 'NeoForge', 'Vanilla', 'ELauncher'];
   }
 
   // Линейка 1.20.x:
   if (versionId.startsWith('1.20')) {
-    // 1.20 и 1.20.1 — классический Forge, Fabric, Vanilla (NeoForge появился только с 1.20.2)
+    // 1.20 и 1.20.1 — классический Forge, Fabric, Vanilla, ELauncher
     if (versionId === '1.20' || versionId === '1.20.1') {
-      return ['Fabric', 'Forge', 'Vanilla'];
+      return ['Fabric', 'Forge', 'Vanilla', 'ELauncher'];
     }
     // 1.20.2 - 1.20.6 — произошел раскол Forge -> NeoForge
-    return ['Fabric', 'NeoForge', 'Forge', 'Vanilla'];
+    return ['Fabric', 'NeoForge', 'Forge', 'Vanilla', 'ELauncher'];
   }
 
-  // Линейки 1.14 - 1.19.x: Fabric + Forge + Vanilla
+  // Линейки 1.14 - 1.19.x: Fabric + Forge + Vanilla + ELauncher
   const match = versionId.match(/^1\.(\d+)/);
   if (match) {
     const minor = parseInt(match[1], 10);
     if (minor >= 14) {
-      return ['Fabric', 'Forge', 'Vanilla'];
+      return ['Fabric', 'Forge', 'Vanilla', 'ELauncher'];
     }
-    // Линейки 1.2.5 - 1.13.2: Только Forge и Vanilla (Fabric появился с 1.14)
+    // Линейки 1.2.5 - 1.13.2: Forge, Vanilla, ELauncher
     if (minor >= 2 && minor <= 13) {
-      return ['Forge', 'Vanilla'];
+      return ['Forge', 'Vanilla', 'ELauncher'];
     }
   }
 
-  // Все старые релизы до 1.2.5 (1.0.0, 1.1) — только Vanilla
-  return ['Vanilla'];
+  // Все старые релизы до 1.2.5 (1.0.0, 1.1) — Vanilla и ELauncher
+  return ['Vanilla', 'ELauncher'];
 }

@@ -121,7 +121,7 @@ export function checkMinecraftInstalled({ instancesPath, version, loader }) {
   if (!fs.existsSync(versionJar) || !fs.existsSync(versionJson)) {
     return false;
   }
-  if (loader && typeof loader === 'string' && loader.toLowerCase() !== 'vanilla') {
+  if (loader && typeof loader === 'string' && loader.toLowerCase() !== 'vanilla' && loader.toLowerCase() !== 'elauncher') {
     const ldr = loader.toLowerCase();
     const loaderJson = path.join(effectiveInstances, 'versions', `${version}-${ldr}`, `${version}-${ldr}.json`);
     if (!fs.existsSync(loaderJson)) {
@@ -1320,16 +1320,8 @@ export function syncGlobalOptionsBeforeLaunch({ instancesPath, instanceDir }) {
       }
     }
 
-    // 3. Ensure fullscreen:true is set in target options.txt
-    try {
-      let optContent = fs.existsSync(targetOpt) ? fs.readFileSync(targetOpt, 'utf8') : '';
-      if (optContent.includes('fullscreen:')) {
-        optContent = optContent.replace(/fullscreen:\s*(?:false|true)/g, 'fullscreen:true');
-      } else {
-        optContent += '\nfullscreen:true\n';
-      }
-      fs.writeFileSync(targetOpt, optContent, 'utf8');
-    } catch {}
+    // 3. Keep user's existing options.txt without forced mode flipping
+    // Allows seamless windowing and exiting with Esc/Alt+Tab without trapping the cursor or flicker
 
     // 4. If instance already has options.txt, merge preferences from shared_options.txt
     if (fs.existsSync(sharedPath) && fs.existsSync(targetOpt)) {
@@ -1444,7 +1436,7 @@ export async function launchMinecraftProcess(
   }
 
   const loaderStr = (loader || 'Vanilla').toLowerCase();
-  const isLoader = loaderStr !== 'vanilla';
+  const isLoader = loaderStr !== 'vanilla' && loaderStr !== 'elauncher';
   const targetVer = isLoader ? `${version}-${loaderStr}` : version;
 
   const versionDir = path.join(instancesPath, 'versions', version);
@@ -1613,9 +1605,10 @@ export async function launchMinecraftProcess(
     removeCustomSkinPack(instanceDir);
   }
 
-  // Inject ELauncher Abstract Background JavaAgent (works for Vanilla/Forge/Fabric on-the-fly without mod dependencies)
+  // Inject ELauncher Abstract Background JavaAgent (loads on mod loaders Fabric/Forge/NeoForge and exclusive ELauncher loader)
+  const isModdedOrELoader = loaderStr === 'fabric' || loaderStr === 'forge' || loaderStr === 'neoforge' || loaderStr === 'elauncher';
   const bgAgentPath = path.join(launcherPath, 'tools', 'elauncher-bg.jar');
-  if (fs.existsSync(bgAgentPath)) {
+  if (isModdedOrELoader && fs.existsSync(bgAgentPath)) {
     jvmArgs.push(`-javaagent:${bgAgentPath}`);
     onLog({
       raw: '[LAUNCHER] Подключен модуль кинетического фона меню ELauncher (JavaAgent)',
@@ -1663,9 +1656,6 @@ export async function launchMinecraftProcess(
   };
 
   const gameArgs = resolveMinecraftGameArguments(combinedProfileData, templateVars);
-  if (!gameArgs.includes('--fullscreen')) {
-    gameArgs.push('--fullscreen');
-  }
 
   onLog({
     raw: `[LAUNCHER] Запуск процесса: ${javaExe}`,

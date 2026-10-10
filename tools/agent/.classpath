@@ -2,11 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/asm-9.10.1.jar"/>
-	<classpathentry kind="lib" path="lib/asm-commons-9.10.1.jar"/>
-	<classpathentry kind="lib" path="lib/asm-tree-9.10.1.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-3.3.3.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-opengl-3.3.3.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-glfw-3.3.3.jar"/>
+	<classpathentry kind="lib" path="c:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/tools/agent/lib/relocated-asm.jar"/>
+	<classpathentry kind="lib" path="c:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/tools/agent/lib/lwjgl-3.3.3.jar"/>
+	<classpathentry kind="lib" path="c:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/tools/agent/lib/lwjgl-opengl-3.3.3.jar"/>
+	<classpathentry kind="lib" path="c:/Users/zshaf/OneDrive/Desktop/Projects/Eternal Project - MC Launcher/tools/agent/lib/lwjgl-glfw-3.3.3.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

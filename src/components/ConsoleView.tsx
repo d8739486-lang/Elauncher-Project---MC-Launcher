@@ -47,26 +47,37 @@ export function ConsoleView({
   const [copied, setCopied] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isUserScrolledUp = useRef(false);
+  const isProgrammaticScroll = useRef(false);
+  const isUserInteracting = useRef(false);
 
-  // Automatically detect if user manually scrolled up
+  // Automatically detect when user intentionally scrolls up
   const handleScroll = () => {
     const el = containerRef.current;
     if (!el) return;
+
+    // Ignore scroll events generated programmatically by auto-scroll
+    if (isProgrammaticScroll.current) {
+      isProgrammaticScroll.current = false;
+      return;
+    }
+
     const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    // If user is more than 60px from the bottom, pause autoScroll
-    if (distanceToBottom > 60) {
+    // Only pause if the user is actively scrolling with mouse wheel, touch, or drag
+    if (isUserInteracting.current && distanceToBottom > 40) {
       if (autoScroll) {
         setAutoScroll(false);
       }
-      isUserScrolledUp.current = true;
-    } else {
-      isUserScrolledUp.current = false;
+    } else if (distanceToBottom <= 15) {
+      // If user scrolled back down to the very bottom, resume autoScroll
+      if (!autoScroll) {
+        setAutoScroll(true);
+      }
     }
   };
 
   useEffect(() => {
-    if (autoScroll && !isUserScrolledUp.current && containerRef.current) {
+    if (autoScroll && containerRef.current) {
+      isProgrammaticScroll.current = true;
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [logs, autoScroll]);
@@ -191,7 +202,21 @@ export function ConsoleView({
         <div
           ref={containerRef}
           onScroll={handleScroll}
-          className="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-1.5 select-text scroll-smooth"
+          onWheel={() => {
+            isUserInteracting.current = true;
+          }}
+          onTouchMove={() => {
+            isUserInteracting.current = true;
+          }}
+          onMouseDown={() => {
+            isUserInteracting.current = true;
+          }}
+          onMouseUp={() => {
+            setTimeout(() => {
+              isUserInteracting.current = false;
+            }, 300);
+          }}
+          className="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-1.5 select-text"
         >
           {logs.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-[#555d73] gap-2 select-none">

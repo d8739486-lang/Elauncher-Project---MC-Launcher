@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
 Premain-Class: com.eternal.launcher.agent.BackgroundAgent
+Boot-Class-Path: elauncher-bg.jar
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
