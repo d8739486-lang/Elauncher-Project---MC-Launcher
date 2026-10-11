@@ -1078,6 +1078,7 @@ export default function App() {
                   instances={instances}
                   selectedInstanceId={selectedInstanceId}
                   language={settings.language}
+                  instancesPath={settings.instancesPath}
                   onSelectInstance={(id) => {
                     setSelectedInstanceId(id);
                   }}

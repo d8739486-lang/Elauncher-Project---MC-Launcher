@@ -29,6 +29,7 @@ interface InstancesViewProps {
   instances: Instance[];
   selectedInstanceId: string;
   language?: Language;
+  instancesPath?: string;
   onSelectInstance: (id: string) => void;
   onCreateInstance: (instance: Omit<Instance, 'id'>) => void;
   onUpdateInstance: (instance: Instance) => void;
@@ -41,6 +42,7 @@ export function InstancesView({
   instances,
   selectedInstanceId,
   language = 'en',
+  instancesPath = '',
   onSelectInstance,
   onCreateInstance,
   onUpdateInstance,
@@ -207,6 +209,15 @@ export function InstancesView({
     });
   };
 
+  const handleOpenInstanceFolder = async (inst: Instance) => {
+    playPalateClick(0.2);
+    if (!window.electronAPI?.openPath) return;
+    const basePath = instancesPath || '';
+    const sep = basePath.includes('/') ? '/' : '\\';
+    const folder = `${basePath}${sep}instances${sep}${inst.id}`;
+    await window.electronAPI.openPath(folder);
+  };
+
   const handleOpenEdit = (inst: Instance) => {
     playPalateClick(0.24);
     setEditingInstance(inst);
@@ -359,13 +370,6 @@ export function InstancesView({
                   {/* Quick actions top bar */}
                   <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={() => handleOpenEdit(inst)}
-                      title={t.instanceSettingsTip}
-                      className="w-7 h-7 rounded-lg bg-black/75 hover:bg-black text-[#c0c6d6] hover:text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
-                    >
-                      <Settings className="w-3.5 h-3.5" />
-                    </button>
-                    <button
                       onClick={() => handleDuplicateInstance(inst)}
                       title={t.instanceDuplicateTip}
                       className="w-7 h-7 rounded-lg bg-black/75 hover:bg-black text-[#c0c6d6] hover:text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
@@ -373,7 +377,7 @@ export function InstancesView({
                       <Copy className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => playPalateClick(0.18)}
+                      onClick={() => handleOpenInstanceFolder(inst)}
                       title={t.instanceFolderTip}
                       className="w-7 h-7 rounded-lg bg-black/75 hover:bg-black text-[#c0c6d6] hover:text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
                     >
