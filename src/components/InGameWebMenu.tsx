@@ -10,9 +10,11 @@ import {
   Minus,
   X,
   RotateCcw,
+  Sparkles,
+  Box,
 } from 'lucide-react';
 import { playPalateClick } from '../utils/sound';
-import { type Language } from '../utils/i18n';
+import { type Language, translations } from '../utils/i18n';
 
 interface InGameWebMenuProps {
   language: Language;
@@ -38,6 +40,17 @@ export function InGameWebMenu({
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [guiScale, setGuiScale] = useState(1);
   const [windowH, setWindowH] = useState(720);
+
+  // In-game first-run prompt: asking player if they want to keep the custom GUI or switch to Vanilla
+  const [showInGamePrompt, setShowInGamePrompt] = useState(() => {
+    try {
+      return !localStorage.getItem('elauncher_client_choice_made');
+    } catch {
+      return false;
+    }
+  });
+
+  const t = translations[language];
 
   // Dynamic responsive scaling for ANY window resolution (windowed 854x480 up to 4K)
   useEffect(() => {
@@ -367,6 +380,136 @@ export function InGameWebMenu({
 
       {/* Subtle bottom buffer spacing */}
       <div className={`${isCompact ? 'h-2' : 'h-3'} pointer-events-none`} />
+
+      {/* In-Game First-Run Choice Modal (ELauncher Custom Client vs Classic Vanilla) */}
+      <AnimatePresence>
+        {showInGamePrompt && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => {
+                localStorage.setItem('elauncher_client_choice_made', 'true');
+                setShowInGamePrompt(false);
+              }}
+              className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.28, ease: smoothEase }}
+              className="relative z-10 w-full max-w-lg rounded-2xl border border-[#262b3a] bg-[#0c0d12] shadow-[0_30px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden"
+            >
+              <div className="h-12 px-5 border-b border-[#1c1e29] flex items-center justify-between bg-[#10121a]">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#38bdf8]" />
+                  <span className="text-xs font-mono font-bold tracking-wider uppercase text-white">
+                    {t.customClientPromptTitle}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('elauncher_client_choice_made', 'true');
+                    setShowInGamePrompt(false);
+                  }}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#1c1f2b] transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-6 flex flex-col gap-5">
+                <p className="text-sm text-[#cbd5e1] leading-relaxed">
+                  {t.customClientPromptDesc}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Option 1: Stay in ELauncher Custom Client */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playPalateClick(0.24);
+                      localStorage.setItem('elauncher_client_choice_made', 'true');
+                      setShowInGamePrompt(false);
+                    }}
+                    className="p-4 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer bg-[#152338] border-[#38bdf8] shadow-[0_0_20px_rgba(56,189,248,0.15)]"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-9 h-9 rounded-lg bg-[#1e3450] text-[#38bdf8] flex items-center justify-center">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div className="w-5 h-5 rounded-full bg-[#38bdf8] text-black flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-white tracking-wide font-['Barlow_Condensed',sans-serif] uppercase">
+                        {t.customClientPromptEnableBtn}
+                      </div>
+                      <div className="text-[11px] text-[#94a3b8] mt-1 font-mono">
+                        {language === 'ru'
+                          ? 'Современный безрамочный клиент в стиле Lunar Client'
+                          : 'Modern frameless client shell (Lunar style)'}
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Option 2: Switch to Classic Vanilla GUI */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playPalateClick(0.24);
+                      localStorage.setItem('elauncher_client_choice_made', 'true');
+                      setShowInGamePrompt(false);
+                      if (onVanilla) {
+                        onVanilla();
+                      }
+                    }}
+                    className="p-4 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer bg-[#10121a] border-[#222634] hover:border-[#353c52]"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-9 h-9 rounded-lg bg-[#1a1c26] text-[#94a3b8] flex items-center justify-center">
+                        <Box className="w-5 h-5" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-white tracking-wide font-['Barlow_Condensed',sans-serif] uppercase">
+                        {t.customClientPromptDisableBtn}
+                      </div>
+                      <div className="text-[11px] text-[#94a3b8] mt-1 font-mono">
+                        {language === 'ru'
+                          ? 'Перейти в оригинальный интерфейс Minecraft прямо сейчас'
+                          : 'Switch to original Minecraft TitleScreen now'}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="pt-3 border-t border-[#1c1e29] flex items-center justify-between">
+                  <span className="text-[11px] font-mono text-[#64748b]">
+                    {t.customClientPromptSettingsHint}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playPalateClick(0.24);
+                      localStorage.setItem('elauncher_client_choice_made', 'true');
+                      setShowInGamePrompt(false);
+                    }}
+                    className="px-5 h-9 rounded-xl bg-white hover:bg-[#e4e7ee] active:scale-95 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer font-['Barlow_Condensed',sans-serif]"
+                  >
+                    {language === 'ru' ? 'Закрыть' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
