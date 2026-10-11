@@ -250,30 +250,38 @@ export function InGameWebMenu({
             transform: `scale(${guiScale})`,
             transformOrigin: 'center center',
           }}
-          className="w-full max-w-[400px] flex flex-col items-center justify-center transition-transform duration-300 ease-out"
+          className="w-full max-w-[560px] flex flex-col items-center justify-center transition-transform duration-300 ease-out"
         >
-          {/* Title Header - Crisp High-Resolution Typography */}
+          {/* Title Header - Official Crisp Large ELauncher Project Brand Logo */}
           <motion.div
             initial={{ opacity: 0, y: -16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.45, ease: smoothEase }}
-            className={`flex flex-col items-center relative select-none ${
-              isCompact ? 'mb-4' : 'mb-6 sm:mb-7'
+            className={`flex items-center justify-center relative select-none whitespace-nowrap ${
+              isCompact ? 'mb-4' : 'mb-6 sm:mb-8'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <span className="text-3xl sm:text-4xl md:text-5xl font-black italic tracking-wider uppercase font-['Barlow_Condensed',sans-serif] bg-gradient-to-r from-white via-[#f1f5f9] to-[#94a3b8] bg-clip-text text-transparent drop-shadow-[0_12px_28px_rgba(0,0,0,0.95)]">
-                ELAUNCHER
-              </span>
-              <span className="text-3xl sm:text-4xl md:text-5xl font-black italic tracking-widest uppercase font-['Barlow_Condensed',sans-serif] text-[#38bdf8] drop-shadow-[0_0_25px_rgba(56,189,248,0.45)]">
-                PROJECT
+            <div className="flex items-center select-none drop-shadow-[0_14px_32px_rgba(0,0,0,0.95)]">
+              <img
+                src="/letter_e_tight.png"
+                alt="E"
+                className={`object-contain inline-block -mr-[3px] sm:-mr-[6px] ${
+                  isCompact ? 'h-11 sm:h-14' : 'h-16 sm:h-20 md:h-24'
+                }`}
+              />
+              <span
+                style={{ transform: 'skewX(-10deg)' }}
+                className={`font-black uppercase tracking-wider text-white font-['Barlow_Condensed',sans-serif] leading-none inline-block origin-bottom ${
+                  isCompact ? 'text-3xl sm:text-4xl' : 'text-5xl sm:text-6xl md:text-7xl'
+                }`}
+              >
+                LAUNCHER&nbsp;PROJECT
               </span>
             </div>
-            <div className="h-0.5 w-24 sm:w-32 bg-gradient-to-r from-transparent via-[#38bdf8]/60 to-transparent mt-1.5" />
           </motion.div>
 
           {/* 4 Main Action Buttons (Instant synchronous GPU-accelerated hover) */}
-          <div className={`w-full flex flex-col ${isCompact ? 'gap-2' : 'gap-2.5'}`}>
+          <div className={`w-full max-w-[440px] sm:max-w-[470px] flex flex-col ${isCompact ? 'gap-2' : 'gap-2.5'}`}>
             {menuButtons.map((btn, index) => {
               const Icon = btn.icon;
               const isDanger = btn.danger;
