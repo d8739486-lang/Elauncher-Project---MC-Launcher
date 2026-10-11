@@ -6,6 +6,7 @@ import { spawn } from 'child_process';
 import https from 'https';
 import http from 'http';
 import zlib from 'zlib';
+import { setupUniversalThemeAssets, injectUniversalThemeToInstance } from './scripts/universalTheme.js';
 
 export function getDefaultInstancesPath() {
   const appData = process.env.APPDATA || (process.platform === 'darwin' ? path.join(os.homedir(), 'Library/Application Support') : path.join(os.homedir(), '.local/share'));
@@ -1605,14 +1606,48 @@ export async function launchMinecraftProcess(
     removeCustomSkinPack(instanceDir);
   }
 
-  // Inject ELauncher Abstract Background JavaAgent (loads on mod loaders Fabric/Forge/NeoForge and exclusive ELauncher loader)
-  const isModdedOrELoader = loaderStr === 'fabric' || loaderStr === 'forge' || loaderStr === 'neoforge' || loaderStr === 'elauncher';
-  const bgAgentPath = path.join(launcherPath, 'tools', 'elauncher-bg.jar');
-  if (isModdedOrELoader && fs.existsSync(bgAgentPath)) {
-    jvmArgs.push(`-javaagent:${bgAgentPath}`);
+  // ── ELauncher JavaAgent: Custom Main Menu (background + animated buttons) ──────────────────
+  // Works on ALL versions: Vanilla, Fabric, Forge, NeoForge, Snapshots.
+  // No resource packs, no mods — pure JVM-level injection via -javaagent.
+  // The agent reads elauncher.bgImage to load the background texture at runtime.
+  const bgAgentCandidates = [
+    path.join(launcherPath, 'tools', 'elauncher-bg.jar'),
+    path.join(process.cwd(), 'tools', 'elauncher-bg.jar'),
+    path.join(path.dirname(process.execPath || ''), 'tools', 'elauncher-bg.jar'),
+    path.join(path.dirname(process.argv[1] || ''), 'tools', 'elauncher-bg.jar'),
+  ];
+  const resolvedAgentPath = bgAgentCandidates.find(p => fs.existsSync(p)) || null;
+
+  // Background image: prefer the one in launcherPath, fall back to project root
+  const bgImageCandidates = [
+    path.join(launcherPath, 'menu_background.jpg'),
+    path.join(process.cwd(), 'menu_background.jpg'),
+    path.join(path.dirname(process.argv[1] || ''), 'menu_background.jpg'),
+    path.join(path.dirname(process.execPath || ''), 'menu_background.jpg'),
+  ];
+  const resolvedBgImage = bgImageCandidates.find(p => fs.existsSync(p)) || '';
+
+  const modAssetsDir = path.join(process.cwd(), 'mod_assets');
+
+  if (resolvedAgentPath) {
+    jvmArgs.push(`-javaagent:${resolvedAgentPath}`);
+    if (!cpEntries.includes(resolvedAgentPath)) {
+      cpEntries.push(resolvedAgentPath);
+    }
+    if (resolvedBgImage) {
+      jvmArgs.push(`-Delauncher.bgImage=${resolvedBgImage}`);
+    }
+    if (fs.existsSync(modAssetsDir)) {
+      jvmArgs.push(`-Delauncher.assetsDir=${modAssetsDir}`);
+    }
     onLog({
-      raw: '[LAUNCHER] Подключен модуль кинетического фона меню ELauncher (JavaAgent)',
+      raw: '[LAUNCHER] ELauncher Menu Agent активирован: ' + resolvedAgentPath + (resolvedBgImage ? ` (bg: ${path.basename(resolvedBgImage)})` : ''),
       level: 'info',
+    });
+  } else {
+    onLog({
+      raw: '[LAUNCHER] tools/elauncher-bg.jar не найден — собери агент через tools/build-agent.ps1',
+      level: 'warn',
     });
   }
 

@@ -27,7 +27,8 @@ declare global {
       minimize: () => void;
       maximize: () => void;
       toggleFullscreen: () => void;
-      close: () => void;
+      close: (lang?: string) => void;
+      updateLanguage?: (lang: string) => void;
       isMaximized?: () => Promise<boolean>;
       isFullscreen?: () => Promise<boolean>;
       onFullscreenChange?: (callback: (isFullscreen: boolean) => void) => void;
@@ -101,6 +102,7 @@ declare global {
       stopMinecraft?: () => Promise<boolean>;
       detectSystemJavas?: (params?: string | { launcherPath: string }) => Promise<JavaInfo[]>;
       downloadJavaRuntime?: (params: { launcherPath: string; major?: number; majorVersion?: number | string }) => Promise<{ success: boolean; javaPath?: string; error?: string }>;
+      triggerGameMenuAction?: (action: string) => Promise<{ success: boolean }>;
       onMinecraftLog?: (callback: (logLine: string | { raw: string; level?: 'info' | 'warn' | 'error' | 'success' }) => void) => () => void;
       onMinecraftExit?: (callback: (code: number) => void) => () => void;
       onMinecraftDownloadProgress?: (callback: (data: { progress: number; text: string }) => void) => () => void;

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="tools/agent/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="tools/agent/lib/relocated-asm.jar"/>
+	<classpathentry kind="lib" path="tools/agent/lib/lwjgl-3.3.3.jar"/>
+	<classpathentry kind="lib" path="tools/agent/lib/lwjgl-opengl-3.3.3.jar"/>
+	<classpathentry kind="lib" path="tools/agent/lib/lwjgl-glfw-3.3.3.jar"/>
+	<classpathentry kind="output" path="tools/agent/classes"/>
+</classpath>

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, Notification, nativeImage, screen } from 'electron';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
@@ -46,11 +46,197 @@ function findRustEngineBinary() {
   return null;
 }
 
-// Explicitly set Windows Application User Model ID so the taskbar displays the custom icon
-app.setAppUserModelId('com.eternal.launcher');
+// In development mode (electron .), Windows taskbar groups windows by executable path (electron.exe).
+// Setting AppUserModelId to 'com.eternal.launcher' in dev causes Windows to look for a pinned shortcut with that AUMID,
+// and when it cannot find one, it falls back to electron.exe's default atom icon!
+// Setting process.execPath tells Windows to keep our runtime icon bound to the current window directly.
+if (process.env.NODE_ENV !== 'production') {
+  app.setAppUserModelId(process.execPath);
+} else {
+  app.setAppUserModelId('com.eternal.launcher');
+}
+
+function getAgentBridgePort() {
+  try {
+    const bridgePath = path.join(getDefaultLauncherPath(), 'agent-bridge.json');
+    if (fs.existsSync(bridgePath)) {
+      const data = JSON.parse(fs.readFileSync(bridgePath, 'utf8'));
+      if (data && data.port) return data.port;
+    }
+  } catch {}
+  return 28751;
+}
+
+let overlayWindow = null;
+let overlayMonitorInterval = null;
+let lastAttachedMcHwnd = null;
+
+function getAppIcon() {
+  const icoPath = path.join(__dirname, 'assets', 'icon.ico');
+  const pngPath = path.join(__dirname, 'assets', 'icon.png');
+  if (fs.existsSync(icoPath)) {
+    return nativeImage.createFromPath(icoPath);
+  }
+  if (fs.existsSync(pngPath)) {
+    return nativeImage.createFromPath(pngPath);
+  }
+  return null;
+}
+
+function stopOverlayMonitor() {
+  if (overlayMonitorInterval) {
+    clearInterval(overlayMonitorInterval);
+    overlayMonitorInterval = null;
+  }
+  lastAttachedMcHwnd = null;
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    try {
+      overlayWindow.destroy();
+    } catch {}
+    overlayWindow = null;
+  }
+}
+
+function startOverlayMonitor() {
+  stopOverlayMonitor();
+
+  let consecutiveFailures = 0;
+  const iconPath = path.join(__dirname, 'assets', 'icon.ico');
+  const appIcon = getAppIcon();
+
+  overlayMonitorInterval = setInterval(async () => {
+    try {
+      const port = getAgentBridgePort();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 350);
+
+      const res = await fetch(`http://127.0.0.1:${port}/status`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        consecutiveFailures++;
+        return;
+      }
+
+      const status = await res.json();
+      consecutiveFailures = 0;
+
+      if (status.inMenu) {
+        if (!overlayWindow || overlayWindow.isDestroyed()) {
+          overlayWindow = new BrowserWindow({
+            title: 'ELauncher In-Game Menu',
+            width: (status.w && status.w > 200) ? status.w : 1280,
+            height: (status.h && status.h > 200) ? status.h : 720,
+            x: typeof status.x === 'number' ? status.x : undefined,
+            y: typeof status.y === 'number' ? status.y : undefined,
+            frame: false,
+            transparent: true,
+            backgroundColor: '#00000000',
+            skipTaskbar: true,
+            icon: appIcon || iconPath,
+            resizable: false,
+            show: false,
+            hasShadow: false,
+            webPreferences: {
+              preload: path.resolve(__dirname, 'preload.cjs'),
+              nodeIntegration: false,
+              contextIsolation: true,
+              sandbox: false,
+              devTools: false,
+            },
+          });
+
+          overlayWindow.setMenuBarVisibility(false);
+
+          const isDev = process.env.NODE_ENV !== 'production';
+          if (isDev) {
+            overlayWindow.loadURL('http://localhost:5173/?mode=overlay');
+          } else {
+            overlayWindow.loadFile(path.join(__dirname, 'dist', 'index.html'), { query: { mode: 'overlay' } });
+          }
+        }
+
+        // Bridge native window ownership if mcHwnd is reported
+        if (status.mcHwnd && status.mcHwnd !== '0' && lastAttachedMcHwnd !== status.mcHwnd) {
+          lastAttachedMcHwnd = status.mcHwnd;
+          try {
+            const nativeHandle = overlayWindow.getNativeWindowHandle();
+            const overlayHwnd = nativeHandle.readBigInt64LE(0).toString();
+            fetch(`http://127.0.0.1:${port}/attach`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ overlayHwnd }),
+            }).catch(() => {});
+          } catch {}
+        }
+
+        if (overlayWindow && !overlayWindow.isDestroyed()) {
+          // Window visibility rule:
+          // Stay visible whenever Minecraft is in main menu and not minimized.
+          // Native Windows parent ownership (SetWindowLongPtr GWLP_HWNDPARENT) keeps the overlay
+          // perfectly tied to Minecraft's Z-order, so Alt+Tab works natively without flickering or hiding!
+          const shouldBeVisible = status.inMenu && !status.minimized && status.visible;
+
+          if (shouldBeVisible) {
+            if (status.w > 100 && status.h > 100) {
+              // Convert physical screen coordinates from Minecraft to Electron DIP coordinates
+              let targetX = status.x;
+              let targetY = status.y;
+              let targetW = status.w;
+              let targetH = status.h;
+
+              try {
+                const dipPoint = screen.screenToDipPoint({ x: status.x, y: status.y });
+                const matchedDisplay = screen.getDisplayNearestPoint(dipPoint) || screen.getPrimaryDisplay();
+                const scale = matchedDisplay.scaleFactor || 1;
+                targetX = dipPoint.x;
+                targetY = dipPoint.y;
+                targetW = Math.round(status.w / scale);
+                targetH = Math.round(status.h / scale);
+              } catch {
+                const primaryDisplay = screen.getPrimaryDisplay();
+                const scale = primaryDisplay?.scaleFactor || 1;
+                targetX = Math.round(status.x / scale);
+                targetY = Math.round(status.y / scale);
+                targetW = Math.round(status.w / scale);
+                targetH = Math.round(status.h / scale);
+              }
+
+              const cur = overlayWindow.getBounds();
+              if (Math.abs(cur.x - targetX) > 1 || Math.abs(cur.y - targetY) > 1 ||
+                  Math.abs(cur.width - targetW) > 1 || Math.abs(cur.height - targetH) > 1) {
+                overlayWindow.setBounds({ x: targetX, y: targetY, width: targetW, height: targetH });
+              }
+            }
+
+            if (!overlayWindow.isVisible()) {
+              overlayWindow.showInactive();
+            }
+          } else {
+            if (overlayWindow.isVisible()) {
+              overlayWindow.hide();
+            }
+          }
+        }
+      } else {
+        if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
+          overlayWindow.hide();
+        }
+      }
+    } catch (err) {
+      consecutiveFailures++;
+      if (consecutiveFailures > 60 && !isMinecraftProcessRunning()) {
+        stopOverlayMonitor();
+      }
+    }
+  }, 20);
+}
+
 
 function createWindow() {
-  const iconPath = path.join(__dirname, 'assets', 'icon.ico');
+  const appIcon = getAppIcon();
 
   const win = new BrowserWindow({
     title: 'ELauncher',
@@ -61,7 +247,7 @@ function createWindow() {
     backgroundColor: '#050608',
     frame: false, // Frameless for custom title bar
     show: false,
-    icon: iconPath,
+    icon: appIcon || path.join(__dirname, 'assets', 'icon.ico'),
     webPreferences: {
       preload: path.resolve(__dirname, 'preload.cjs'),
       nodeIntegration: false,
@@ -111,21 +297,103 @@ function createWindow() {
   };
 
   win.once('ready-to-show', () => {
+    if (appIcon) {
+      try {
+        win.setIcon(appIcon);
+      } catch {}
+    }
     win.show();
   });
 
-  let allowExitThroughAltF4 = false;
+  // Re-assert window icon on restore / unminimize to prevent Windows DWM from dropping it
+  win.on('restore', () => {
+    if (appIcon) {
+      try {
+        win.setIcon(appIcon);
+      } catch {}
+    }
+  });
+  win.on('focus', () => {
+    if (appIcon) {
+      try {
+        win.setIcon(appIcon);
+      } catch {}
+    }
+  });
+
+  let currentAppLanguage = 'en';
+
+  ipcMain.on('settings-language-changed', (_event, lang) => {
+    if (lang && typeof lang === 'string') {
+      currentAppLanguage = lang;
+    }
+  });
+
+  const notifyGameKeepsRunning = (lang) => {
+    const effectiveLang = (lang === 'ru' || lang === 'en_uk') ? lang : currentAppLanguage;
+    const isRu = effectiveLang === 'ru';
+
+    const title = isRu
+      ? 'ELauncher — Игра продолжает работать'
+      : 'ELauncher — Minecraft is still running';
+
+    const body = isRu
+      ? 'Minecraft продолжит работать в фоновом режиме, но логи и консоль больше не будут видны в лаунчере. Вы можете проигнорировать это сообщение и спокойно продолжить игру.'
+      : 'Minecraft will continue running, but logs and console output will not be monitored. You can safely ignore this notification and enjoy your game.';
+
+    try {
+      if (Notification.isSupported()) {
+        const notif = new Notification({
+          title,
+          body,
+          icon: iconPath,
+          silent: false,
+        });
+        notif.show();
+      }
+    } catch (e) {
+      console.warn('Failed to display Windows notification:', e);
+    }
+  };
+
+  const notifyLaunchCancelled = (lang) => {
+    const effectiveLang = (lang === 'ru' || lang === 'en_uk') ? lang : currentAppLanguage;
+    const isRu = effectiveLang === 'ru';
+
+    const title = isRu
+      ? 'ELauncher — Запуск отменён'
+      : 'ELauncher — Launch cancelled';
+
+    const body = isRu
+      ? 'Запуск Minecraft был отменён, так как лаунчер был закрыт во время подготовки к запуску.'
+      : 'Minecraft launch was cancelled because the launcher was closed during startup.';
+
+    try {
+      if (Notification.isSupported()) {
+        const notif = new Notification({
+          title,
+          body,
+          icon: iconPath,
+          silent: false,
+        });
+        notif.show();
+      }
+    } catch (e) {
+      console.warn('Failed to display Windows notification:', e);
+    }
+  };
+
+  let isGameLaunching = false;
 
   // Intercept window close attempt (Close button, Alt+Tab close, Taskbar close, Task Manager graceful exit)
-  win.on('close', (event) => {
-    // If Minecraft is running, forbid closing launcher by cross button or taskbar until Alt+F4 or stopped via Console
-    if (isMinecraftProcessRunning() && !allowExitThroughAltF4) {
-      event.preventDefault();
-      safeSend('minecraft-log', {
-        raw: '[LAUNCHER] Закрытие лаунчера заблокировано: сначала остановите Minecraft через консоль или нажмите Alt+F4',
-        level: 'warn',
-      });
-      return false;
+  win.on('close', () => {
+    if (isGameLaunching) {
+      isGameLaunching = false;
+      stopOverlayMonitor();
+      stopMinecraftProcess();
+      notifyLaunchCancelled(currentAppLanguage);
+    } else if (isMinecraftProcessRunning()) {
+      notifyGameKeepsRunning(currentAppLanguage);
     }
   });
 
@@ -152,25 +420,9 @@ function createWindow() {
       safeSend('maximize-changed', win.isMaximized());
     }
   });
-  ipcMain.on('window-close', () => {
-    // Block close button if Minecraft is running
-    if (isMinecraftProcessRunning()) {
-      safeSend('minecraft-log', {
-        raw: '[LAUNCHER] Лаунчер нельзя закрыть кнопкой «крестик», пока работает Minecraft. Остановите игру через консоль или используйте Alt+F4.',
-        level: 'warn',
-      });
-      return;
-    }
+  ipcMain.on('window-close', (_event, lang) => {
+    if (lang) currentAppLanguage = lang;
     if (!win.isDestroyed()) win.close();
-  });
-
-  // Register Alt+F4 bypass so user can still forcefully close with Alt+F4 if desired
-  win.webContents.on('before-input-event', (event, input) => {
-    if (input.alt && input.key && input.key.toLowerCase() === 'f4') {
-      allowExitThroughAltF4 = true;
-      // Allow window to close
-      win.close();
-    }
   });
 
   ipcMain.handle('window-is-maximized', () => !win.isDestroyed() && win.isMaximized());
@@ -253,6 +505,7 @@ function createWindow() {
 
   // Launch Minecraft process and stream real console logs
   ipcMain.handle('launch-minecraft', async (_event, params = {}) => {
+    isGameLaunching = true;
     try {
       const instancesPath = (params?.instancesPath && typeof params.instancesPath === 'string' && params.instancesPath.trim())
         ? params.instancesPath.trim()
@@ -312,11 +565,16 @@ function createWindow() {
           safeSend('minecraft-log', logItem);
         },
         (code) => {
+          isGameLaunching = false;
+          stopOverlayMonitor();
           safeSend('minecraft-exit', code);
         }
       );
+      isGameLaunching = false;
+      startOverlayMonitor();
       return { success: true, pid: proc?.pid };
     } catch (err) {
+      isGameLaunching = false;
       console.error('Launch Minecraft error:', err);
       return { success: false, error: err.message };
     }
@@ -324,7 +582,49 @@ function createWindow() {
 
   // Stop active game process
   ipcMain.handle('stop-minecraft', async () => {
+    stopOverlayMonitor();
     return stopMinecraftProcess();
+  });
+
+  // Trigger game menu action via local JavaAgent bridge
+  ipcMain.handle('trigger-game-menu-action', async (_event, action) => {
+    // If the user clicked Quit Game, terminate directly and smoothly without ever flashing the vanilla screen!
+    if (action === 'quit') {
+      try {
+        if (overlayWindow && !overlayWindow.isDestroyed()) {
+          overlayWindow.destroy();
+          overlayWindow = null;
+        }
+      } catch {}
+      stopOverlayMonitor();
+      stopMinecraftProcess();
+      return { success: true };
+    }
+
+    try {
+      const port = getAgentBridgePort();
+      const res = await fetch(`http://127.0.0.1:${port}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+
+      // Hide overlay only AFTER the action is successfully dispatched to the agent,
+      // preventing vanilla Minecraft menu from briefly flashing before the screen opens!
+      setTimeout(() => {
+        if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
+          overlayWindow.hide();
+        }
+      }, 50);
+
+      return { success: res.ok };
+    } catch (err) {
+      console.warn('Failed to dispatch game menu action to agent bridge:', err.message);
+      if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
+        overlayWindow.hide();
+      }
+      return { success: false, error: err.message };
+    }
   });
 
   // Detect installed Java runtimes on user system

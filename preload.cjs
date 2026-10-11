@@ -10,8 +10,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   toggleFullscreen: () => {
     ipcRenderer.send('window-fullscreen');
   },
-  close: () => {
-    ipcRenderer.send('window-close');
+  close: (lang) => {
+    ipcRenderer.send('window-close', lang);
+  },
+  updateLanguage: (lang) => {
+    ipcRenderer.send('settings-language-changed', lang);
   },
   isMaximized: () => {
     return ipcRenderer.invoke('window-is-maximized');
@@ -110,5 +113,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (_event, data) => callback(data);
     ipcRenderer.on('java-download-progress', handler);
     return () => ipcRenderer.removeListener('java-download-progress', handler);
+  },
+  triggerGameMenuAction: (action) => {
+    return ipcRenderer.invoke('trigger-game-menu-action', action);
   },
 });

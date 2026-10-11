@@ -50,14 +50,33 @@
 
 ---
 
-## 4. Фоновый шейдер (`DitherWaveCanvas.tsx`)
-- Расположен в `src/components/DitherWaveCanvas.tsx`.
-- Реализован как **настоящий WebGL фрагментный шейдер (Fullscreen Quad Shader)** в аутентичном стиле **Nedohackers / Cyber Retro**:
-  - **Крутящиеся и рассекающиеся 3D топографические волны**: процедурная синусоидальная лента с диагональным рассечением и изо-линиями сканирования.
-  - **Упорядоченный дизеринг Bayer 8×8 (Ordered Dithering)**: матричное пиксельное квантование света (экранная сетка ретро-консоли).
-  - **Нулевая нагрузка на процессор (0% CPU)**: вся математика вычисляется на видеокарте в реальном времени с идеальными 60 FPS.
-  - **Интерактивность**: плавное смещение угла вращения и перспективы при переключении вкладок (`tabOffset`) + мышиный параллакс с инерцией.
-  - **Глубокая виньетка**: мягкое затемнение по краям экрана.
+## 4. JavaAgent — Кастомное главное меню Minecraft (`tools/agent/`)
+- JAR: `tools/elauncher-bg.jar` (пересобрать через `tools/build-agent.ps1`)
+- Деплой: `%APPDATA%\ELauncher\tools\elauncher-bg.jar` + `%APPDATA%\ELauncher\menu_background.jpg`
+- Работает на **ВСЕХ версиях**: Vanilla, Fabric, Forge, NeoForge, Snapshots.
+- **Без модов, без ресурспаков** — чистый JVM-уровень через `-javaagent`.
+
+### Архитектура (4 класса):
+1. **`BackgroundAgent.java`** — `premain()` + ASM-трансформеры 3 классов:
+   - `hor` / `class_766` → `PanoramaRenderer.render()` → заменяет на `ShaderRenderer.renderBackground()`
+   - `gsb` / `class_437` → `Screen.renderPanorama()` → подавляет ванильную панораму
+   - `gsf` / `class_442` → `TitleScreen.render()` → вызывает `MenuDispatcher.dispatchIfNeeded()`
+2. **`ShaderRenderer.java`** — OpenGL рендеринг:
+   - Загружает `menu_background.jpg` через `javax.imageio.ImageIO` (zero extra deps)
+   - Путь к изображению передаётся через `-Delauncher.bgImage=...` (из `minecraftEngine.js`)
+   - Рисует кнопки (Singleplayer, Multiplayer, Settings, Language, Quit) через GLSL + GLFW mouse polling
+   - Кнопочные лейблы генерируются Java AWT `Graphics2D` как текстуры
+3. **`MenuState.java`** — `volatile String pendingAction` — мост кликов между ShaderRenderer и BackgroundAgent
+4. **`MenuDispatcher.java`** — читает `MenuState.pendingAction` и навигирует в нужный экран Minecraft через Reflection
+
+### Передача параметров из лаунчера:
+```
+-javaagent:${launcherPath}/tools/elauncher-bg.jar
+-Delauncher.bgImage=${launcherPath}/menu_background.jpg
+```
+Добавляется автоматически в `minecraftEngine.js` для **всех** версий (включая Vanilla).
+
+> ⚠️ **Ресурспак-костыль `universalTheme` удалён** — он нестабилен на разных версиях и конфликтует с Fabric/Forge модами. Импорт в `minecraftEngine.js` остался, но вызовы убраны.
 
 ---
 

@@ -24,6 +24,7 @@ import { filterMinecraftLog, getCurrentTimeFormatted } from './utils/logFilter';
 import { playPalateClick } from './utils/sound';
 import { translations } from './utils/i18n';
 import { AnimatedText } from './components/AnimatedText';
+import { InGameWebMenu } from './components/InGameWebMenu';
 import type { Instance } from './types/instance';
 import type { Account } from './types/account';
 import {
@@ -33,6 +34,7 @@ import {
   saveActiveAccountId,
   syncElyByAccountSkin,
 } from './utils/accountService';
+
 
 // Ultra-smooth cubic bezier easing curve (Apple/Framer polish)
 const smoothEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -97,11 +99,50 @@ export default function App() {
       try {
         localStorage.setItem('elauncher_app_settings', JSON.stringify(updated));
       } catch {}
+      if (newPartial.language && window.electronAPI?.updateLanguage) {
+        window.electronAPI.updateLanguage(newPartial.language);
+      }
       return updated;
     });
   };
 
   const t = translations[settings.language];
+
+  const isOverlayMode = typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('mode') === 'overlay' ||
+    window.location.hash === '#/overlay'
+  );
+
+  const handleTriggerGameAction = async (action: string) => {
+    try {
+      if (window.electronAPI?.triggerGameMenuAction) {
+        await window.electronAPI.triggerGameMenuAction(action);
+      } else {
+        await fetch('http://127.0.0.1:28751/action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action }),
+        });
+      }
+    } catch (e) {
+      console.error('Trigger game action failed:', e);
+    }
+  };
+
+  if (isOverlayMode) {
+    return (
+      <div className="w-screen h-screen overflow-hidden bg-[#050608]">
+        <InGameWebMenu
+          language={settings.language}
+          onLanguageChange={(newLang) => handleUpdateSettings({ language: newLang })}
+          onSingleplayer={() => handleTriggerGameAction('singleplayer')}
+          onMultiplayer={() => handleTriggerGameAction('multiplayer')}
+          onSettings={() => handleTriggerGameAction('settings')}
+          onQuit={() => handleTriggerGameAction('quit')}
+        />
+      </div>
+    );
+  }
 
   // Auto-detect and populate system default paths on initial mount
   useEffect(() => {
@@ -531,12 +572,8 @@ export default function App() {
     }
   };
   const handleClose = () => {
-    if (isGameRunning) {
-      appendLog('[LAUNCHER] Закрытие заблокировано: сначала завершите игру через консоль или нажмите Alt+F4.', 'warn');
-      return;
-    }
     if (window.electronAPI) {
-      window.electronAPI.close();
+      window.electronAPI.close(settings.language);
     } else {
       window.close();
     }

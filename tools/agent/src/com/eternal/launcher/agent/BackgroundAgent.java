@@ -5,103 +5,143 @@ import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import com.eternal.bgasm.*;
 
+/**
+ * ELauncher JavaAgent — Universal Minecraft Main Menu Bridge & Injector
+ *
+ * Intercepts TitleScreen to track active status, suppress vanilla UI,
+ * and execute custom menu actions on Minecraft's render thread.
+ * Starts AgentServer to bridge state with Electron Web Overlay.
+ */
 public class BackgroundAgent {
 
     public static void premain(String agentArgs, Instrumentation inst) {
-        System.out.println("[ELauncher Agent] Initializing custom abstract shader background agent...");
+        System.out.println("[ELauncher Agent] ========================================");
+        System.out.println("[ELauncher Agent] ELauncher Web Overlay Bridge Agent v4.0");
+        System.out.println("[ELauncher Agent] Zero Mod Dependency / Universal Engine");
+        System.out.println("[ELauncher Agent] ========================================");
+
+        // Start lightweight local IPC server
+        try {
+            AgentServer.start();
+        } catch (Throwable t) {
+            System.err.println("[ELauncher Agent] Failed to start AgentServer: " + t);
+        }
+
         inst.addTransformer(new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                                     ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-                if (className == null) return null;
+                if (className == null || classfileBuffer == null) return null;
 
-                // 1. hor (Vanilla) or net/minecraft/class_766 (Fabric Intermediary) -> PanoramaRenderer
-                if (className.equals("hor") || className.equals("net/minecraft/class_766")) {
+                // ── 1. RENDER SYSTEM FLIP FRAME HOOK ────────────────────────────────────
+                // RenderSystem is never obfuscated by Mojang.
+                // We hook flipFrame to update GLFW window metrics on Minecraft's render thread.
+                if (className.equals("com/mojang/blaze3d/systems/RenderSystem")) {
                     try {
-                        return transformPanoramaRenderer(classfileBuffer, className);
+                        return transformRenderSystem(classfileBuffer);
                     } catch (Throwable t) {
-                        System.err.println("[ELauncher Agent] Error transforming PanoramaRenderer (" + className + "): " + t);
+                        System.err.println("[ELauncher Agent] Error patching RenderSystem: " + t);
+                    }
+                }
+
+                // ── 2. UNIVERSAL TITLE SCREEN HOOK ─────────────────────────────────────
+                if (isTitleScreen(className, classfileBuffer)) {
+                    System.out.println("[ELauncher Agent] Detected TitleScreen class: " + className);
+                    try {
+                        return transformTitleScreen(classfileBuffer, className);
+                    } catch (Throwable t) {
+                        System.err.println("[ELauncher Agent] Error patching TitleScreen (" + className + "): " + t);
                         t.printStackTrace();
                     }
                 }
 
-                // 2. gsb (Vanilla) or net/minecraft/class_437 (Fabric Intermediary) -> Screen
-                // Intercept renderPanorama: a(gir, float) or method_57728
-                if (className.equals("gsb") || className.equals("net/minecraft/class_437")) {
+                // ── 3. PANORAMA SUPPRESSION HOOK ───────────────────────────────────────
+                if (isPanoramaClass(className, classfileBuffer)) {
                     try {
-                        return transformScreen(classfileBuffer, className);
+                        return suppressPanorama(classfileBuffer, className);
                     } catch (Throwable t) {
-                        System.err.println("[ELauncher Agent] Error transforming Screen (" + className + "): " + t);
-                        t.printStackTrace();
+                        System.err.println("[ELauncher Agent] Error suppressing panorama (" + className + "): " + t);
                     }
                 }
 
                 return null;
             }
-        });
+        }, true);
     }
 
-    private static byte[] transformPanoramaRenderer(byte[] classfileBuffer, String targetClassName) {
+    private static boolean isTitleScreen(String className, byte[] buffer) {
+        if (className.equals("gsd") || className.equals("gsf")
+                || className.equals("net/minecraft/class_442")
+                || className.equals("net/minecraft/client/gui/screens/TitleScreen")
+                || className.equals("net/minecraft/client/gui/screen/TitleScreen")
+                || className.equals("net/minecraft/client/gui/GuiMainMenu")) {
+            return true;
+        }
+        return containsUtf8(buffer, "menu.singleplayer") && containsUtf8(buffer, "menu.multiplayer");
+    }
+
+    private static boolean isPanoramaClass(String className, byte[] buffer) {
+        if (className.equals("hor") || className.equals("net/minecraft/class_766")
+                || className.equals("net/minecraft/client/renderer/PanoramaRenderer")) {
+            return true;
+        }
+        return containsUtf8(buffer, "textures/gui/title/background/panorama_")
+                || containsUtf8(buffer, "panorama_0.png");
+    }
+
+    private static boolean containsUtf8(byte[] data, String target) {
+        byte[] pattern = target.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        if (data.length < pattern.length) return false;
+        int max = data.length - pattern.length;
+        for (int i = 0; i <= max; i++) {
+            boolean match = true;
+            for (int j = 0; j < pattern.length; j++) {
+                if (data[i + j] != pattern[j]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Injects MenuState.onTitleScreenTick(this) and early return into TitleScreen.render(...)
+     */
+    private static byte[] transformTitleScreen(byte[] classfileBuffer, String targetClassName) {
         ClassReader reader = new ClassReader(classfileBuffer);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
+        final boolean[] hooked = new boolean[1];
+
         ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9, writer) {
             @Override
-            public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+            public MethodVisitor visitMethod(int access, String name, String descriptor,
+                                             String signature, String[] exceptions) {
                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
 
-                // Matches hor.a(gir, int, int, boolean) or method_3317(class_332, int, int, boolean)
-                boolean isTargetMethod = (name.equals("a") || name.equals("method_3317"))
-                        && (descriptor.endsWith(";IIZ)V") || descriptor.equals("(Lgir;IIZ)V"));
+                boolean isRenderMethod = descriptor.endsWith("IIF)V")
+                        && !name.equals("<init>")
+                        && !name.equals("b");
 
-                if (isTargetMethod) {
-                    System.out.println("[ELauncher Agent] Hooking " + targetClassName + "." + name + descriptor + " with kinetic shader renderer");
+                if (isRenderMethod && !hooked[0]) {
+                    hooked[0] = true;
+                    System.out.println("[ELauncher Agent] Intercepting TitleScreen render: " + targetClassName + "." + name + descriptor);
                     return new MethodVisitor(Opcodes.ASM9, mv) {
                         @Override
                         public void visitCode() {
                             super.visitCode();
-                            // Reflection invocation ensures zero ClassLoader boundary issues across Knot/Fabric
-                            // Calls ShaderRenderer.renderBackground(width, height)
-                            Label continueLabel = new Label();
-
-                            mv.visitLdcInsn("com.eternal.launcher.agent.ShaderRenderer");
-                            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Class", "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
-
-                            mv.visitLdcInsn("renderBackground");
-                            mv.visitInsn(Opcodes.ICONST_2);
-                            mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Class");
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_0);
-                            mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
-                            mv.visitInsn(Opcodes.AASTORE);
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_1);
-                            mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
-                            mv.visitInsn(Opcodes.AASTORE);
-
-                            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getMethod", "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;", false);
-
-                            mv.visitInsn(Opcodes.ACONST_NULL);
-                            mv.visitInsn(Opcodes.ICONST_2);
-                            mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_0);
-                            mv.visitVarInsn(Opcodes.ILOAD, 2); // width
-                            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-                            mv.visitInsn(Opcodes.AASTORE);
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_1);
-                            mv.visitVarInsn(Opcodes.ILOAD, 3); // height
-                            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-                            mv.visitInsn(Opcodes.AASTORE);
-
-                            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/reflect/Method", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", false);
-                            mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
-                            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
-
-                            mv.visitJumpInsn(Opcodes.IFEQ, continueLabel); // If false, fallback
-                            mv.visitInsn(Opcodes.RETURN); // Custom background handled!
-                            mv.visitLabel(continueLabel);
+                            // MenuState.onTitleScreenTick(this);
+                            mv.visitVarInsn(Opcodes.ALOAD, 0);
+                            mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                    "com/eternal/launcher/agent/MenuState",
+                                    "onTitleScreenTick",
+                                    "(Ljava/lang/Object;)V",
+                                    false);
+                            // NOTE: Do not return early here! If we return early, OpenGL
+                            // never updates or buffers stay cleared black, causing black screens when transitioning!
+                            // Vanilla renders in the background while our Electron window overlays it cleanly.
                         }
                     };
                 }
@@ -113,74 +153,61 @@ public class BackgroundAgent {
         return writer.toByteArray();
     }
 
-    private static byte[] transformScreen(byte[] classfileBuffer, String targetClassName) {
+    /**
+     * Hooks RenderSystem.flipFrame to update GLFW window metrics on Minecraft's render thread.
+     */
+    private static byte[] transformRenderSystem(byte[] classfileBuffer) {
         ClassReader reader = new ClassReader(classfileBuffer);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
         ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9, writer) {
             @Override
-            public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+            public MethodVisitor visitMethod(int access, String name, String descriptor,
+                                             String signature, String[] exceptions) {
                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
 
-                // Matches gsb.a(gir, float) or method_57728(class_332, float) -> renderPanorama
-                boolean isRenderPanorama = (name.equals("a") || name.equals("method_57728"))
-                        && (descriptor.endsWith(";F)V") || descriptor.equals("(Lgir;F)V"));
-
-                if (isRenderPanorama) {
-                    System.out.println("[ELauncher Agent] Hooking " + targetClassName + "." + name + descriptor + " (renderPanorama)");
+                if (name.equals("flipFrame")) {
+                    System.out.println("[ELauncher Agent] Hooked RenderSystem.flipFrame");
                     return new MethodVisitor(Opcodes.ASM9, mv) {
                         @Override
                         public void visitCode() {
                             super.visitCode();
-                            Label continueLabel = new Label();
+                            // Call MenuState.onRenderFrame() at the very start of flipFrame
+                            mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                    "com/eternal/launcher/agent/MenuState",
+                                    "onRenderFrame",
+                                    "()V",
+                                    false);
+                        }
+                    };
+                }
+                return mv;
+            }
+        };
 
-                            mv.visitLdcInsn("com.eternal.launcher.agent.ShaderRenderer");
-                            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Class", "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
+        reader.accept(visitor, 0);
+        return writer.toByteArray();
+    }
 
-                            mv.visitLdcInsn("renderBackground");
-                            mv.visitInsn(Opcodes.ICONST_2);
-                            mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Class");
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_0);
-                            mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
-                            mv.visitInsn(Opcodes.AASTORE);
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_1);
-                            mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
-                            mv.visitInsn(Opcodes.AASTORE);
+    /**
+     * Suppresses panorama rendering calls so they return immediately without drawing anything.
+     */
+    private static byte[] suppressPanorama(byte[] classfileBuffer, String targetClassName) {
+        ClassReader reader = new ClassReader(classfileBuffer);
+        ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
-                            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getMethod", "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;", false);
+        ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9, writer) {
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String descriptor,
+                                             String signature, String[] exceptions) {
+                MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
 
-                            mv.visitInsn(Opcodes.ACONST_NULL);
-                            mv.visitInsn(Opcodes.ICONST_2);
-                            mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_0);
-
-                            // Load this.width
-                            mv.visitVarInsn(Opcodes.ALOAD, 0);
-                            String widthField = targetClassName.equals("gsb") ? "o" : "field_22789";
-                            mv.visitFieldInsn(Opcodes.GETFIELD, targetClassName, widthField, "I");
-                            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-                            mv.visitInsn(Opcodes.AASTORE);
-
-                            mv.visitInsn(Opcodes.DUP);
-                            mv.visitInsn(Opcodes.ICONST_1);
-
-                            // Load this.height
-                            mv.visitVarInsn(Opcodes.ALOAD, 0);
-                            String heightField = targetClassName.equals("gsb") ? "p" : "field_22790";
-                            mv.visitFieldInsn(Opcodes.GETFIELD, targetClassName, heightField, "I");
-                            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-                            mv.visitInsn(Opcodes.AASTORE);
-
-                            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/reflect/Method", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", false);
-                            mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
-                            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
-
-                            mv.visitJumpInsn(Opcodes.IFEQ, continueLabel);
-                            mv.visitInsn(Opcodes.RETURN); // Custom background handled completely!
-                            mv.visitLabel(continueLabel);
+                if (descriptor.endsWith(";IIZ)V") || descriptor.contains("gir") && descriptor.endsWith(")V")) {
+                    return new MethodVisitor(Opcodes.ASM9, mv) {
+                        @Override
+                        public void visitCode() {
+                            super.visitCode();
+                            mv.visitInsn(Opcodes.RETURN);
                         }
                     };
                 }
