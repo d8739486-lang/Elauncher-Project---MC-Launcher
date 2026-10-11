@@ -32,6 +32,33 @@ public final class MenuState {
 
     private static long lastMetricsPoll = 0;
 
+    public static void showMinecraftWindow() {
+        try {
+            long hwnd = minecraftHwnd;
+            if (hwnd != 0) {
+                User32.ShowWindow(hwnd, 1);
+            }
+            long win = GLFW.glfwGetCurrentContext();
+            if (win != 0) {
+                GLFW.glfwShowWindow(win);
+                GLFW.glfwFocusWindow(win);
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    public static void hideMinecraftWindow() {
+        try {
+            long hwnd = minecraftHwnd;
+            if (hwnd != 0) {
+                User32.ShowWindow(hwnd, 0);
+            }
+            long win = GLFW.glfwGetCurrentContext();
+            if (win != 0) {
+                GLFW.glfwHideWindow(win);
+            }
+        } catch (Throwable ignored) {}
+    }
+
     public static void onTitleScreenTick(Object titleScreen) {
         activeTitleScreen = titleScreen;
         lastTitleScreenTick = System.currentTimeMillis();
@@ -40,6 +67,8 @@ public final class MenuState {
         if (action != null) {
             pendingAction = null;
             dispatchAction(titleScreen, action);
+        } else {
+            hideMinecraftWindow();
         }
     }
 
@@ -136,14 +165,22 @@ public final class MenuState {
         System.out.println("[ELauncher Agent] Executing action on TitleScreen: " + action);
         try {
             if ("singleplayer".equalsIgnoreCase(action)) {
+                showMinecraftWindow();
                 MenuDispatcher.openSingleplayer(titleScreen);
             } else if ("multiplayer".equalsIgnoreCase(action)) {
+                showMinecraftWindow();
                 MenuDispatcher.openMultiplayer(titleScreen);
             } else if ("settings".equalsIgnoreCase(action)) {
+                showMinecraftWindow();
                 MenuDispatcher.openSettings(titleScreen);
             } else if ("language".equalsIgnoreCase(action)) {
+                showMinecraftWindow();
                 MenuDispatcher.openLanguage(titleScreen);
             } else if ("quit".equalsIgnoreCase(action)) {
+                hideMinecraftWindow();
+                try {
+                    System.exit(0);
+                } catch (Throwable ignored) {}
                 MenuDispatcher.quitGame(titleScreen);
             }
         } catch (Throwable t) {

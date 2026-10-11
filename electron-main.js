@@ -125,20 +125,22 @@ function startOverlayMonitor() {
 
       if (status.inMenu) {
         if (!overlayWindow || overlayWindow.isDestroyed()) {
+          const defaultW = (status.w && status.w > 400) ? Math.max(960, status.w) : 1280;
+          const defaultH = (status.h && status.h > 300) ? Math.max(600, status.h) : 720;
+
           overlayWindow = new BrowserWindow({
             title: 'ELauncher In-Game Menu',
-            width: (status.w && status.w > 200) ? status.w : 1280,
-            height: (status.h && status.h > 200) ? status.h : 720,
-            x: typeof status.x === 'number' ? status.x : undefined,
-            y: typeof status.y === 'number' ? status.y : undefined,
+            width: defaultW,
+            height: defaultH,
             frame: false,
-            transparent: true,
-            backgroundColor: '#00000000',
-            skipTaskbar: true,
+            transparent: false,
+            backgroundColor: '#050608',
+            skipTaskbar: false,
+            center: true,
             icon: appIcon || iconPath,
-            resizable: false,
+            resizable: true,
             show: false,
-            hasShadow: false,
+            hasShadow: true,
             webPreferences: {
               preload: path.resolve(__dirname, 'preload.cjs'),
               nodeIntegration: false,
@@ -158,61 +160,13 @@ function startOverlayMonitor() {
           }
         }
 
-        // Bridge native window ownership if mcHwnd is reported
-        if (status.mcHwnd && status.mcHwnd !== '0' && lastAttachedMcHwnd !== status.mcHwnd) {
-          lastAttachedMcHwnd = status.mcHwnd;
-          try {
-            const nativeHandle = overlayWindow.getNativeWindowHandle();
-            const overlayHwnd = nativeHandle.readBigInt64LE(0).toString();
-            fetch(`http://127.0.0.1:${port}/attach`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ overlayHwnd }),
-            }).catch(() => {});
-          } catch {}
-        }
-
         if (overlayWindow && !overlayWindow.isDestroyed()) {
-          // Window visibility rule:
-          // Stay visible whenever Minecraft is in main menu and not minimized.
-          // Native Windows parent ownership (SetWindowLongPtr GWLP_HWNDPARENT) keeps the overlay
-          // perfectly tied to Minecraft's Z-order, so Alt+Tab works natively without flickering or hiding!
-          const shouldBeVisible = status.inMenu && !status.minimized && status.visible;
+          const shouldBeVisible = status.inMenu && !status.minimized;
 
           if (shouldBeVisible) {
-            if (status.w > 100 && status.h > 100) {
-              // Convert physical screen coordinates from Minecraft to Electron DIP coordinates
-              let targetX = status.x;
-              let targetY = status.y;
-              let targetW = status.w;
-              let targetH = status.h;
-
-              try {
-                const dipPoint = screen.screenToDipPoint({ x: status.x, y: status.y });
-                const matchedDisplay = screen.getDisplayNearestPoint(dipPoint) || screen.getPrimaryDisplay();
-                const scale = matchedDisplay.scaleFactor || 1;
-                targetX = dipPoint.x;
-                targetY = dipPoint.y;
-                targetW = Math.round(status.w / scale);
-                targetH = Math.round(status.h / scale);
-              } catch {
-                const primaryDisplay = screen.getPrimaryDisplay();
-                const scale = primaryDisplay?.scaleFactor || 1;
-                targetX = Math.round(status.x / scale);
-                targetY = Math.round(status.y / scale);
-                targetW = Math.round(status.w / scale);
-                targetH = Math.round(status.h / scale);
-              }
-
-              const cur = overlayWindow.getBounds();
-              if (Math.abs(cur.x - targetX) > 1 || Math.abs(cur.y - targetY) > 1 ||
-                  Math.abs(cur.width - targetW) > 1 || Math.abs(cur.height - targetH) > 1) {
-                overlayWindow.setBounds({ x: targetX, y: targetY, width: targetW, height: targetH });
-              }
-            }
-
             if (!overlayWindow.isVisible()) {
-              overlayWindow.showInactive();
+              overlayWindow.show();
+              overlayWindow.focus();
             }
           } else {
             if (overlayWindow.isVisible()) {
@@ -397,32 +351,51 @@ function createWindow() {
     }
   });
 
-  ipcMain.on('window-minimize', () => { if (!win.isDestroyed()) win.minimize(); });
-  ipcMain.on('window-maximize', () => {
-    if (!win.isDestroyed()) {
-      if (win.isFullScreen()) {
-        win.setFullScreen(false);
-        win.maximize();
-      } else if (win.isMaximized()) {
-        win.unmaximize();
+  ipcMain.on('window-minimize', (event) => {
+    const targetWin = (event?.sender ? BrowserWindow.fromWebContents(event.sender) : null) || win;
+    if (targetWin && !targetWin.isDestroyed()) targetWin.minimize();
+  });
+  ipcMain.on('window-maximize', (event) => {
+    const targetWin = (event?.sender ? BrowserWindow.fromWebContents(event.sender) : null) || win;
+    if (targetWin && !targetWin.isDestroyed()) {
+      if (targetWin.isFullScreen()) {
+        targetWin.setFullScreen(false);
+        targetWin.maximize();
+      } else if (targetWin.isMaximized()) {
+        targetWin.unmaximize();
       } else {
-        win.maximize();
+        targetWin.maximize();
       }
-      safeSend('maximize-changed', win.isMaximized());
-      safeSend('fullscreen-changed', win.isFullScreen());
+      if (targetWin === win) {
+        safeSend('maximize-changed', win.isMaximized());
+        safeSend('fullscreen-changed', win.isFullScreen());
+      }
     }
   });
-  ipcMain.on('window-fullscreen', () => {
-    if (!win.isDestroyed()) {
-      const nextState = !win.isFullScreen();
-      win.setFullScreen(nextState);
-      safeSend('fullscreen-changed', nextState);
-      safeSend('maximize-changed', win.isMaximized());
+  ipcMain.on('window-fullscreen', (event) => {
+    const targetWin = (event?.sender ? BrowserWindow.fromWebContents(event.sender) : null) || win;
+    if (targetWin && !targetWin.isDestroyed()) {
+      const nextState = !targetWin.isFullScreen();
+      targetWin.setFullScreen(nextState);
+      if (targetWin === win) {
+        safeSend('fullscreen-changed', nextState);
+        safeSend('maximize-changed', win.isMaximized());
+      }
     }
   });
-  ipcMain.on('window-close', (_event, lang) => {
+  ipcMain.on('window-close', (event, lang) => {
+    const targetWin = (event?.sender ? BrowserWindow.fromWebContents(event.sender) : null) || win;
+    if (targetWin === overlayWindow) {
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.destroy();
+        overlayWindow = null;
+      }
+      stopOverlayMonitor();
+      stopMinecraftProcess();
+      return;
+    }
     if (lang) currentAppLanguage = lang;
-    if (!win.isDestroyed()) win.close();
+    if (targetWin && !targetWin.isDestroyed()) targetWin.close();
   });
 
   ipcMain.handle('window-is-maximized', () => !win.isDestroyed() && win.isMaximized());

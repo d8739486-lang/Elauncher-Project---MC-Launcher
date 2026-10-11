@@ -257,27 +257,17 @@ export function InGameWebMenu({
             initial={{ opacity: 0, y: -16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.45, ease: smoothEase }}
-            className={`flex items-center justify-center relative select-none whitespace-nowrap ${
+            className={`flex items-center justify-center relative select-none ${
               isCompact ? 'mb-4' : 'mb-6 sm:mb-8'
             }`}
           >
-            <div className="flex items-center select-none drop-shadow-[0_14px_32px_rgba(0,0,0,0.95)]">
-              <img
-                src="/letter_e_tight.png"
-                alt="E"
-                className={`object-contain inline-block -mr-[3px] sm:-mr-[6px] ${
-                  isCompact ? 'h-11 sm:h-14' : 'h-16 sm:h-20 md:h-24'
-                }`}
-              />
-              <span
-                style={{ transform: 'skewX(-10deg)' }}
-                className={`font-black uppercase tracking-wider text-white font-['Barlow_Condensed',sans-serif] leading-none inline-block origin-bottom ${
-                  isCompact ? 'text-3xl sm:text-4xl' : 'text-5xl sm:text-6xl md:text-7xl'
-                }`}
-              >
-                LAUNCHER&nbsp;PROJECT
-              </span>
-            </div>
+            <img
+              src="/title_elauncher_project.png"
+              alt="ELauncher Project"
+              className={`object-contain select-none drop-shadow-[0_16px_36px_rgba(0,0,0,0.95)] ${
+                isCompact ? 'h-12 sm:h-14' : 'h-18 sm:h-22 md:h-26'
+              }`}
+            />
           </motion.div>
 
           {/* 4 Main Action Buttons (Instant synchronous GPU-accelerated hover) */}
