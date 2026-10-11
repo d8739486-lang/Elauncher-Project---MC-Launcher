@@ -238,7 +238,13 @@ public final class AgentServer {
 
             if (!action.isEmpty()) {
                 System.out.println("[ELauncher Agent] Queued action from IPC: " + action);
-                MenuState.pendingAction = action;
+                if ("custom".equalsIgnoreCase(action) || "restore_custom".equalsIgnoreCase(action)) {
+                    System.setProperty("elauncher.active", "true");
+                    MenuState.inGameSession = false;
+                    MenuState.hideMinecraftWindow();
+                } else {
+                    MenuState.pendingAction = action;
+                }
             }
 
             byte[] bytes = "{\"success\":true}".getBytes(StandardCharsets.UTF_8);

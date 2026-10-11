@@ -1002,6 +1002,77 @@ export function removeCustomSkinPack(instanceDir) {
 }
 
 /**
+ * Installs a resource pack that overrides the default player skin textures.
+ * Works for ALL Minecraft versions (1.7 - 1.21+) without mods.
+ * The pack is placed in <instanceDir>/resourcepacks/ELauncher_Skin/ and activated
+ * via options.txt so Minecraft loads it on startup.
+ */
+export async function installSkinResourcePack({ instanceDir, skinDataUrl, skinModel = 'classic', version = '1.20' }) {
+  if (!skinDataUrl) return false;
+  const skinBuffer = await getSkinPngBuffer(skinDataUrl);
+  if (!skinBuffer || skinBuffer.length < 50) return false;
+
+  const packDir = path.join(instanceDir, 'resourcepacks', 'ELauncher_Skin');
+  const texturesDir = path.join(packDir, 'assets', 'minecraft', 'textures');
+  const entityDir = path.join(texturesDir, 'entity');
+  const playerDir = path.join(entityDir, 'player');
+  const playerWideDir = path.join(playerDir, 'wide');
+  const playerSlimDir = path.join(playerDir, 'slim');
+
+  fs.mkdirSync(playerWideDir, { recursive: true });
+  fs.mkdirSync(playerSlimDir, { recursive: true });
+  fs.mkdirSync(entityDir, { recursive: true });
+
+  // Legacy paths (1.7 – 1.19): assets/minecraft/textures/entity/steve.png / alex.png
+  fs.writeFileSync(path.join(entityDir, 'steve.png'), skinBuffer);
+  fs.writeFileSync(path.join(entityDir, 'alex.png'), skinBuffer);
+
+  // Modern paths (1.20+): wide/ and slim/ sub-directories with all 9 model names
+  const allModels = ['steve.png', 'alex.png', 'ari.png', 'efe.png', 'kai.png', 'makena.png', 'noor.png', 'sunny.png', 'zuri.png'];
+  for (const m of allModels) {
+    fs.writeFileSync(path.join(playerWideDir, m), skinBuffer);
+    fs.writeFileSync(path.join(playerSlimDir, m), skinBuffer);
+    fs.writeFileSync(path.join(playerDir, m), skinBuffer);
+  }
+
+  // pack.mcmeta required by Minecraft to recognise this as a valid resource pack
+  const packFormat = getPackFormatForVersion(version);
+  const mcmeta = { pack: { pack_format: packFormat, description: 'ELauncher Player Skin' } };
+  fs.writeFileSync(path.join(packDir, 'pack.mcmeta'), JSON.stringify(mcmeta, null, 2));
+
+  // Activate the pack in options.txt so it loads without requiring user action
+  const optionsPath = path.join(instanceDir, 'options.txt');
+  try {
+    let lines = [];
+    if (fs.existsSync(optionsPath)) {
+      lines = fs.readFileSync(optionsPath, 'utf8').split(/\r?\n/);
+    }
+    let found = false;
+    lines = lines.map((line) => {
+      if (line.startsWith('resourcePacks:')) {
+        found = true;
+        try {
+          const packs = JSON.parse(line.substring('resourcePacks:'.length).trim());
+          if (Array.isArray(packs)) {
+            const cleaned = packs.filter((p) => !p.includes('ELauncher_Skin'));
+            cleaned.unshift('file/ELauncher_Skin');
+            return `resourcePacks:${JSON.stringify(cleaned)}`;
+          }
+        } catch {}
+        return `resourcePacks:["file/ELauncher_Skin"]`;
+      }
+      return line;
+    });
+    if (!found) {
+      lines.push(`resourcePacks:["file/ELauncher_Skin"]`);
+    }
+    fs.writeFileSync(optionsPath, lines.join('\n'), 'utf8');
+  } catch {}
+
+  return true;
+}
+
+/**
  * Simple parser for Minecraft servers.dat (NBT format)
  */
 function parseServersDat(buf) {
@@ -1562,10 +1633,11 @@ export async function launchMinecraftProcess(
 
   // Handle skin system cleanly:
   // - Ely.by accounts: authlib-injector handles skins per-player natively over the network.
-  //   Clean up any old ELauncher_Skin resource pack so other players aren't cloned into the user!
-  // - Offline accounts with custom PNG: inject as system-level classpath entry (not a resourcepack!),
-  //   so it cannot be found, removed, or toggled in-game.
+  //   Additionally install a resource pack fallback so LAN/offline servers also show the skin.
+  // - Offline accounts with custom PNG: install a resource pack that overrides default player
+  //   textures — the only vanilla-compatible way to inject skins without mods.
   if (accountType === 'elyby') {
+    // Always clean stale skin pack first
     removeCustomSkinPack(instanceDir);
     try {
       const authlibJar = await ensureAuthlibInjector({ launcherPath, instancesPath });
@@ -1579,28 +1651,35 @@ export async function launchMinecraftProcess(
     } catch (authErr) {
       console.warn('Failed to attach authlib-injector:', authErr);
     }
-    // Also inject classpath fallback skin if skinUrl is cached or resolved, so singleplayer or offline servers never show Alex/Ari
+    // Resource pack fallback: so LAN/singleplayer mode also uses the player skin
     if (skinUrl) {
       try {
-        const systemSkinDir = await setupSystemSkinClasspath({ launcherPath, skinDataUrl: skinUrl, skinModel });
-        if (systemSkinDir) {
-          cpEntries.unshift(systemSkinDir);
+        const installed = await installSkinResourcePack({ instanceDir, skinDataUrl: skinUrl, skinModel, version });
+        if (installed) {
+          onLog({
+            raw: `[LAUNCHER] Скин игрока (резервный ресурс-пак для LAN/одиночной игры) применён`,
+            level: 'info',
+          });
         }
       } catch {}
     }
   } else if (accountType === 'offline' && skinUrl) {
     removeCustomSkinPack(instanceDir);
     try {
-      const systemSkinDir = await setupSystemSkinClasspath({ launcherPath, skinDataUrl: skinUrl, skinModel });
-      if (systemSkinDir) {
-        cpEntries.unshift(systemSkinDir);
+      const installed = await installSkinResourcePack({ instanceDir, skinDataUrl: skinUrl, skinModel, version });
+      if (installed) {
         onLog({
-          raw: `[LAUNCHER] Системный скин игрока (${skinModel}) интегрирован на уровне движка`,
+          raw: `[LAUNCHER] Скин игрока (${skinModel}) применён через ресурс-пак`,
           level: 'info',
+        });
+      } else {
+        onLog({
+          raw: `[LAUNCHER] Не удалось применить скин (возможно, повреждён PNG файл)`,
+          level: 'warn',
         });
       }
     } catch (skinErr) {
-      console.warn('Failed to setup system skin:', skinErr);
+      console.warn('Failed to install skin resource pack:', skinErr);
     }
   } else {
     removeCustomSkinPack(instanceDir);

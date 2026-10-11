@@ -152,6 +152,29 @@ function createOverlayWindow() {
     }
   });
 
+  const handleResize = () => {
+    if (overlayWindow && !overlayWindow.isDestroyed() && lastAttachedMcHwnd) {
+      try {
+        const [w, h] = overlayWindow.getContentSize();
+        const scriptPath = path.join(__dirname, 'scripts', 'windowEmbedder.ps1');
+        execFile('powershell', [
+          '-NoProfile',
+          '-ExecutionPolicy', 'Bypass',
+          '-File', scriptPath,
+          '-action', 'resize',
+          '-mcHwnd', String(lastAttachedMcHwnd),
+          '-width', String(w),
+          '-height', String(h),
+          '-topOffset', '44',
+        ], () => {});
+      } catch {}
+    }
+  };
+
+  overlayWindow.on('resize', handleResize);
+  overlayWindow.on('maximize', handleResize);
+  overlayWindow.on('unmaximize', handleResize);
+
   return overlayWindow;
 }
 
@@ -189,12 +212,39 @@ function startOverlayMonitor() {
       const status = await res.json();
       consecutiveFailures = 0;
 
-      if (overlayWindow && !overlayWindow.isDestroyed()) {
-        if (status.inMenu && !status.minimized) {
-          if (!overlayWindow.isVisible()) {
-            overlayWindow.show();
-            overlayWindow.focus();
+      // Automatically embed Minecraft GLFW window inside our client container
+      if (status.mcHwnd && status.mcHwnd !== '0' && overlayWindow && !overlayWindow.isDestroyed()) {
+        if (lastAttachedMcHwnd !== status.mcHwnd) {
+          lastAttachedMcHwnd = status.mcHwnd;
+          try {
+            const hwndBuf = overlayWindow.getNativeWindowHandle();
+            const overlayHwnd = (process.arch === 'x64') ? hwndBuf.readBigUInt64LE(0) : BigInt(hwndBuf.readUInt32LE(0));
+            const [w, h] = overlayWindow.getContentSize();
+            const scriptPath = path.join(__dirname, 'scripts', 'windowEmbedder.ps1');
+            execFile('powershell', [
+              '-NoProfile',
+              '-ExecutionPolicy', 'Bypass',
+              '-File', scriptPath,
+              '-action', 'embed',
+              '-mcHwnd', String(status.mcHwnd),
+              '-overlayHwnd', overlayHwnd.toString(),
+              '-width', String(w),
+              '-height', String(h),
+              '-topOffset', '44',
+            ], (embedErr, stdout) => {
+              if (embedErr) console.warn('Minecraft embedding error:', embedErr);
+              else console.log('[EMBED_MC]', stdout ? stdout.trim() : '');
+            });
+          } catch (e) {
+            console.warn('Native handle extraction error:', e);
           }
+        }
+      }
+
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        if (!overlayWindow.isVisible()) {
+          overlayWindow.show();
+          overlayWindow.focus();
         }
       }
     } catch (err) {
@@ -602,15 +652,8 @@ function createWindow() {
       return { success: true };
     }
 
-    // If the user clicked Switch to Vanilla Menu, close custom overlay and restore native window!
+    // If the user clicked Switch to Vanilla Menu, keep container open and show embedded Minecraft
     if (action === 'vanilla') {
-      stopOverlayMonitor();
-      if (overlayWindow && !overlayWindow.isDestroyed()) {
-        try {
-          overlayWindow.destroy();
-        } catch {}
-        overlayWindow = null;
-      }
       try {
         const port = getAgentBridgePort();
         await fetch(`http://127.0.0.1:${port}/action`, {
@@ -619,6 +662,30 @@ function createWindow() {
           body: JSON.stringify({ action: 'vanilla' }),
         });
       } catch {}
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.webContents.send('set-vanilla-mode', true);
+      }
+      return { success: true };
+    }
+
+    // If the user clicked Restore Custom Menu from launcher or shortcut
+    if (action === 'custom') {
+      try {
+        const port = getAgentBridgePort();
+        await fetch(`http://127.0.0.1:${port}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'custom' }),
+        });
+      } catch {}
+      if (!overlayWindow || overlayWindow.isDestroyed()) {
+        createOverlayWindow();
+      } else {
+        overlayWindow.webContents.send('set-vanilla-mode', false);
+        overlayWindow.show();
+        overlayWindow.focus();
+      }
+      startOverlayMonitor();
       return { success: true };
     }
 
@@ -630,19 +697,16 @@ function createWindow() {
         body: JSON.stringify({ action }),
       });
 
-      // Hide overlay only AFTER the action is successfully dispatched to the agent,
-      // preventing vanilla Minecraft menu from briefly flashing before the screen opens!
-      setTimeout(() => {
-        if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
-          overlayWindow.hide();
-        }
-      }, 50);
+      // Switch to embedded Minecraft gameplay view within the container
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.webContents.send('set-vanilla-mode', true);
+      }
 
       return { success: res.ok };
     } catch (err) {
       console.warn('Failed to dispatch game menu action to agent bridge:', err.message);
-      if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
-        overlayWindow.hide();
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.webContents.send('set-vanilla-mode', true);
       }
       return { success: false, error: err.message };
     }
@@ -1134,65 +1198,101 @@ function createWindow() {
     }
   });
 
-  // Direct skin fetch handler bypassing any CORS or browser restrictions
+  // Direct skin fetch handler bypassing any CORS, DNS drops, or ISP blocks
   ipcMain.handle('fetch-elyby-skin', async (_event, username) => {
     try {
       if (!username || typeof username !== 'string') return null;
       const cleanUser = username.trim();
-      
-      // 1. Ely.by direct PNG endpoint
+
+      // Helper to fetch buffer with direct IP and redirect following
+      const fetchBufferWithRedirect = (targetUrl, hostHeader) => {
+        return new Promise((resolve) => {
+          const httpsMod = targetUrl.startsWith('https:') ? https : http;
+          const options = {
+            rejectUnauthorized: false,
+            headers: hostHeader ? { Host: hostHeader, 'User-Agent': 'ELauncher/1.0' } : { 'User-Agent': 'ELauncher/1.0' },
+          };
+          const req = httpsMod.get(targetUrl, options, (res) => {
+            if ((res.statusCode === 301 || res.statusCode === 302 || res.statusCode === 307) && res.headers.location) {
+              const nextUrl = res.headers.location;
+              const nextMod = nextUrl.startsWith('https:') ? https : http;
+              nextMod.get(nextUrl, { rejectUnauthorized: false, headers: { 'User-Agent': 'ELauncher/1.0' } }, (nextRes) => {
+                if (nextRes.statusCode !== 200) return resolve(null);
+                const chunks = [];
+                nextRes.on('data', (c) => chunks.push(c));
+                nextRes.on('end', () => resolve(Buffer.concat(chunks)));
+                nextRes.on('error', () => resolve(null));
+              }).on('error', () => resolve(null));
+              return;
+            }
+            if (res.statusCode !== 200) return resolve(null);
+            const chunks = [];
+            res.on('data', (c) => chunks.push(c));
+            res.on('end', () => resolve(Buffer.concat(chunks)));
+            res.on('error', () => resolve(null));
+          });
+          req.on('error', () => resolve(null));
+          req.setTimeout(4000, () => {
+            req.destroy();
+            resolve(null);
+          });
+        });
+      };
+
+      // 1. Direct Ely.by authoritative server (167.235.12.151) - immune to DNS cache poisoning
       try {
-        const res = await fetch(`https://skinsystem.ely.by/skins/${encodeURIComponent(cleanUser)}.png`);
-        if (res.ok) {
-          const arrayBuf = await res.arrayBuffer();
-          if (arrayBuf.byteLength > 100) {
-            const base64 = Buffer.from(arrayBuf).toString('base64');
-            return `data:image/png;base64,${base64}`;
-          }
+        const buf = await fetchBufferWithRedirect(
+          `https://167.235.12.151/skins/${encodeURIComponent(cleanUser)}.png`,
+          'skinsystem.ely.by'
+        );
+        if (buf && buf.length > 100) {
+          return `data:image/png;base64,${buf.toString('base64')}`;
         }
       } catch {}
 
-      // 2. Ely.by profile JSON metadata endpoint
+      // 2. Standard domain fetch for skinsystem.ely.by
       try {
-        const profileRes = await fetch(`https://skinsystem.ely.by/profile/${encodeURIComponent(cleanUser)}`);
-        if (profileRes.ok && profileRes.status !== 204) {
-          const text = await profileRes.text();
-          if (text) {
-            const data = JSON.parse(text);
-            const texturesProp = data?.properties?.find((p) => p.name === 'textures');
-            if (texturesProp?.value) {
-              const decoded = JSON.parse(Buffer.from(texturesProp.value, 'base64').toString('utf8'));
-              const skinUrl = decoded?.textures?.SKIN?.url;
-              if (skinUrl) {
-                const skinRes = await fetch(skinUrl);
-                if (skinRes.ok) {
-                  const arrayBuf = await skinRes.arrayBuffer();
-                  if (arrayBuf.byteLength > 100) {
-                    const base64 = Buffer.from(arrayBuf).toString('base64');
-                    return `data:image/png;base64,${base64}`;
-                  }
-                }
+        const buf = await fetchBufferWithRedirect(
+          `https://skinsystem.ely.by/skins/${encodeURIComponent(cleanUser)}.png`
+        );
+        if (buf && buf.length > 100) {
+          return `data:image/png;base64,${buf.toString('base64')}`;
+        }
+      } catch {}
+
+      // 3. Ely.by profile JSON metadata endpoint via authoritative server
+      try {
+        const jsonBuf = await fetchBufferWithRedirect(
+          `https://167.235.12.151/profile/${encodeURIComponent(cleanUser)}`,
+          'skinsystem.ely.by'
+        );
+        if (jsonBuf && jsonBuf.length > 20) {
+          const profileData = JSON.parse(jsonBuf.toString('utf8'));
+          const texturesProp = profileData?.properties?.find((p) => p.name === 'textures');
+          if (texturesProp?.value) {
+            const decoded = JSON.parse(Buffer.from(texturesProp.value, 'base64').toString('utf8'));
+            const skinUrl = decoded?.textures?.SKIN?.url;
+            if (skinUrl) {
+              const skinBuf = await fetchBufferWithRedirect(skinUrl);
+              if (skinBuf && skinBuf.length > 100) {
+                return `data:image/png;base64,${skinBuf.toString('base64')}`;
               }
             }
           }
         }
       } catch {}
 
-      // 3. Fallback to Minotar skin CDN for standard or Mojang names
+      // 4. Fallback to Minotar skin CDN for standard or Mojang names
       try {
-        const minotarRes = await fetch(`https://minotar.net/skin/${encodeURIComponent(cleanUser)}`);
-        if (minotarRes.ok) {
-          const arrayBuf = await minotarRes.arrayBuffer();
-          if (arrayBuf.byteLength > 100) {
-            const base64 = Buffer.from(arrayBuf).toString('base64');
-            return `data:image/png;base64,${base64}`;
-          }
+        const buf = await fetchBufferWithRedirect(`https://minotar.net/skin/${encodeURIComponent(cleanUser)}`);
+        if (buf && buf.length > 100) {
+          return `data:image/png;base64,${buf.toString('base64')}`;
         }
       } catch {}
 
       return null;
     } catch (err) {
-      console.warn('Failed to fetch skin texture via IPC:', err);
+      console.warn('Failed to fetch Ely.by skin for:', username, err);
       return null;
     }
   });

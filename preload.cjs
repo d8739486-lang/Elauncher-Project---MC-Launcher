@@ -120,4 +120,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAgentStatus: () => {
     return ipcRenderer.invoke('get-agent-status');
   },
+  onSetVanillaMode: (callback) => {
+    const handler = (_event, isVanilla) => callback(isVanilla);
+    ipcRenderer.on('set-vanilla-mode', handler);
+    return () => ipcRenderer.removeListener('set-vanilla-mode', handler);
+  },
 });

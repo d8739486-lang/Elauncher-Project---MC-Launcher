@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { InGameOverlayRoot } from './components/InGameOverlayRoot.tsx'
 
 // Block all standard browser shortcuts and context menus for pure native app feel
 if (typeof window !== 'undefined') {
@@ -69,8 +70,13 @@ if (typeof window !== 'undefined') {
   }, { capture: true });
 }
 
+const isOverlayMode = typeof window !== 'undefined' && (
+  new URLSearchParams(window.location.search).get('mode') === 'overlay' ||
+  window.location.hash === '#/overlay'
+);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {isOverlayMode ? <InGameOverlayRoot /> : <App />}
   </StrictMode>,
 )

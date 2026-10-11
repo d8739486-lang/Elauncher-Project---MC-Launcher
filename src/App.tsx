@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Minus,
-  Maximize2,
-  Minimize2,
   X,
   Play,
   Layers,
@@ -19,12 +17,11 @@ import { InstancesView } from './components/InstancesView';
 import { ModsView } from './components/ModsView';
 import { ConsoleView, type LogEntry } from './components/ConsoleView';
 import { SettingsModalContent, type AppSettings } from './components/SettingsModalContent';
-import { AccountsView, AccountAvatar, ElyByIcon, OfflineIcon } from './components/AccountsView';
+import { AccountsView, AccountAvatar } from './components/AccountsView';
 import { filterMinecraftLog, getCurrentTimeFormatted } from './utils/logFilter';
 import { playPalateClick } from './utils/sound';
 import { translations } from './utils/i18n';
 import { AnimatedText } from './components/AnimatedText';
-import { InGameWebMenu } from './components/InGameWebMenu';
 import type { Instance } from './types/instance';
 import type { Account } from './types/account';
 import {
@@ -32,7 +29,6 @@ import {
   saveAccounts,
   getActiveAccountId,
   saveActiveAccountId,
-  syncElyByAccountSkin,
 } from './utils/accountService';
 
 
@@ -110,42 +106,6 @@ export default function App() {
 
   const t = translations[settings.language];
 
-  const isOverlayMode = typeof window !== 'undefined' && (
-    new URLSearchParams(window.location.search).get('mode') === 'overlay' ||
-    window.location.hash === '#/overlay'
-  );
-
-  const handleTriggerGameAction = async (action: string) => {
-    try {
-      if (window.electronAPI?.triggerGameMenuAction) {
-        await window.electronAPI.triggerGameMenuAction(action);
-      } else {
-        await fetch('http://127.0.0.1:28751/action', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action }),
-        });
-      }
-    } catch (e) {
-      console.error('Trigger game action failed:', e);
-    }
-  };
-
-  if (isOverlayMode) {
-    return (
-      <div className="w-screen h-screen overflow-hidden bg-[#050608]">
-        <InGameWebMenu
-          language={settings.language}
-          onLanguageChange={(newLang) => handleUpdateSettings({ language: newLang })}
-          onSingleplayer={() => handleTriggerGameAction('singleplayer')}
-          onMultiplayer={() => handleTriggerGameAction('multiplayer')}
-          onSettings={() => handleTriggerGameAction('settings')}
-          onVanilla={() => handleTriggerGameAction('vanilla')}
-          onQuit={() => handleTriggerGameAction('quit')}
-        />
-      </div>
-    );
-  }
 
   // Auto-detect and populate system default paths on initial mount
   useEffect(() => {
@@ -234,27 +194,6 @@ export default function App() {
       return updated;
     });
   };
-
-  // Synchronize Ely.by account skins in background on startup
-  useEffect(() => {
-    const initialAccounts = getSavedAccounts();
-    initialAccounts.forEach((acc) => {
-      if (acc.type === 'elyby') {
-        syncElyByAccountSkin(acc)
-          .then((synced) => {
-            if (synced.skinAvatarUrl !== acc.skinAvatarUrl || synced.skinUrl !== acc.skinUrl) {
-              setAccounts((prev) => {
-                const updated = prev.map((a) => (a.id === synced.id ? synced : a));
-                saveAccounts(updated);
-                return updated;
-              });
-            }
-          })
-          .catch(() => {});
-      }
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     try {
@@ -716,18 +655,6 @@ export default function App() {
               onClick={(e) => {
                 e.stopPropagation();
                 playPalateClick(0.18);
-                handleToggleFullscreen();
-              }}
-              onDoubleClick={(e) => e.stopPropagation()}
-              title={isFullscreen ? 'Exit Fullscreen (F11)' : 'Fullscreen (F11)'}
-              className="w-10 h-full flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#161616] transition-colors cursor-pointer"
-            >
-              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 pointer-events-none" /> : <Maximize2 className="w-3.5 h-3.5 pointer-events-none" />}
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                playPalateClick(0.18);
                 handleMinimize();
               }}
               onDoubleClick={(e) => e.stopPropagation()}
@@ -969,19 +896,7 @@ export default function App() {
                                   {activeAccount ? activeAccount.username : t.accounts}
                                 </span>
                                 <span className="text-[10px] font-mono flex items-center gap-1 text-[#788099] leading-none mt-0.5">
-                                  {activeAccount?.type === 'elyby' ? (
-                                    <>
-                                      <ElyByIcon className="w-2.5 h-2.5" />
-                                      <span>Ely.by</span>
-                                    </>
-                                  ) : activeAccount ? (
-                                    <>
-                                      <OfflineIcon className="w-2.5 h-2.5" />
-                                      <span>Offline</span>
-                                    </>
-                                  ) : (
-                                    <span>—</span>
-                                  )}
+                                  {activeAccount ? (activeAccount.skinUrl ? 'Скин' : 'Игрок') : '—'}
                                 </span>
                               </div>
                             </button>

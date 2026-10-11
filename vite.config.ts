@@ -14,9 +14,12 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/elyby-auth/, ''),
       },
       '/api/elyby-skins': {
-        target: 'https://skinsystem.ely.by',
+        target: 'https://167.235.12.151',
         changeOrigin: true,
-        secure: true,
+        secure: false,
+        headers: {
+          Host: 'skinsystem.ely.by',
+        },
         rewrite: (path) => path.replace(/^\/api\/elyby-skins/, ''),
       },
     },

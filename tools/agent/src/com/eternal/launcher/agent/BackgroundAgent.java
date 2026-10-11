@@ -207,7 +207,17 @@ public class BackgroundAgent {
                         @Override
                         public void visitCode() {
                             super.visitCode();
+                            // If our agent is active, suppress panorama rendering.
+                            // If agent is inactive (vanilla mode), allow panorama to render normally!
+                            Label continueLabel = new Label();
+                            mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                    "com/eternal/launcher/agent/MenuState",
+                                    "isAgentActive",
+                                    "()Z",
+                                    false);
+                            mv.visitJumpInsn(Opcodes.IFEQ, continueLabel);
                             mv.visitInsn(Opcodes.RETURN);
+                            mv.visitLabel(continueLabel);
                         }
                     };
                 }

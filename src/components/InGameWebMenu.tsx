@@ -10,6 +10,7 @@ import {
   Minus,
   X,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { playPalateClick } from '../utils/sound';
 import { type Language, translations } from '../utils/i18n';
@@ -36,6 +37,8 @@ export function InGameWebMenu({
   onQuit,
 }: InGameWebMenuProps) {
   const [isGameReady, setIsGameReady] = useState(false);
+  const [loadStage, setLoadStage] = useState<'booting' | 'fading_text' | 'fading_curtain' | 'ready'>('booting');
+  const [isVanillaMode, setIsVanillaMode] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [guiScale, setGuiScale] = useState(1);
@@ -51,17 +54,25 @@ export function InGameWebMenu({
     if (window.electronAPI?.onMaximizeChange) {
       window.electronAPI.onMaximizeChange(setIsMaximized);
     }
+    if (window.electronAPI?.onSetVanillaMode) {
+      const unsub = window.electronAPI.onSetVanillaMode((val: boolean) => {
+        setIsVanillaMode(val);
+      });
+      return unsub;
+    }
   }, []);
 
-  // Poll agent bridge until Minecraft reaches TitleScreen
+  // Poll agent bridge until Minecraft reaches TitleScreen (fast 80ms poll for zero delay when music starts)
   useEffect(() => {
     let isCancelled = false;
+    let pollCount = 0;
 
     const pollStatus = async () => {
+      pollCount++;
       try {
         if (window.electronAPI?.getAgentStatus) {
           const status = await window.electronAPI.getAgentStatus();
-          if (!isCancelled && status?.inMenu) {
+          if (!isCancelled && (status?.inMenu || (pollCount > 150 && status?.mcHwnd && status.mcHwnd !== '0'))) {
             setIsGameReady(true);
             return;
           }
@@ -69,7 +80,7 @@ export function InGameWebMenu({
           const res = await fetch('http://127.0.0.1:28751/status');
           if (res.ok) {
             const status = await res.json();
-            if (!isCancelled && status?.inMenu) {
+            if (!isCancelled && (status?.inMenu || (pollCount > 150 && status?.mcHwnd && status.mcHwnd !== '0'))) {
               setIsGameReady(true);
               return;
             }
@@ -81,13 +92,44 @@ export function InGameWebMenu({
     };
 
     pollStatus();
-    const interval = setInterval(pollStatus, 160);
+    const interval = setInterval(pollStatus, 80);
+
+    // Failsafe timer: if Minecraft starts slowly or agent report has a gap, never stay stuck on black screen
+    const failsafeTimeout = setTimeout(() => {
+      if (!isCancelled) {
+        setIsGameReady(true);
+      }
+    }, 12000);
 
     return () => {
       isCancelled = true;
       clearInterval(interval);
+      clearTimeout(failsafeTimeout);
     };
   }, []);
+
+  // Sequenced smooth transition: Loader dissolves smoothly and swiftly right as music starts
+  useEffect(() => {
+    if (isGameReady && loadStage === 'booting') {
+      // Step 1: Text floats up & dissolves with blur
+      setLoadStage('fading_text');
+
+      const t1 = setTimeout(() => {
+        // Step 2: Dark curtain dissolves in sync with music
+        setLoadStage('fading_curtain');
+      }, 160);
+
+      const t2 = setTimeout(() => {
+        // Step 3: Complete loader exit and trigger full menu entrance cascade
+        setLoadStage('ready');
+      }, 420);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, [isGameReady, loadStage]);
 
   // Dynamic responsive scaling for ANY window resolution (windowed 854x480 up to 4K)
   useEffect(() => {
@@ -115,6 +157,7 @@ export function InGameWebMenu({
   };
 
   const isCompact = windowH < 560;
+  const isMenuVisible = loadStage === 'fading_curtain' || loadStage === 'ready';
 
   const menuButtons = [
     {
@@ -122,21 +165,30 @@ export function InGameWebMenu({
       title: language === 'ru' ? 'Одиночная игра' : 'Singleplayer',
       subtitle: language === 'ru' ? 'Локальные миры' : 'Singleplayer worlds',
       icon: User,
-      onClick: onSingleplayer,
+      onClick: () => {
+        setIsVanillaMode(true);
+        onSingleplayer();
+      },
     },
     {
       id: 'multiplayer',
       title: language === 'ru' ? 'Сетевая игра' : 'Multiplayer',
       subtitle: language === 'ru' ? 'Серверы' : 'Multiplayer servers',
       icon: Globe2,
-      onClick: onMultiplayer,
+      onClick: () => {
+        setIsVanillaMode(true);
+        onMultiplayer();
+      },
     },
     {
       id: 'settings',
       title: language === 'ru' ? 'Настройки' : 'Settings',
       subtitle: language === 'ru' ? 'Настройки игры' : 'Game settings',
       icon: SettingsIcon,
-      onClick: onSettings,
+      onClick: () => {
+        setIsVanillaMode(true);
+        onSettings();
+      },
     },
     {
       id: 'quit',
@@ -148,29 +200,48 @@ export function InGameWebMenu({
     },
   ];
 
+  const handleToggleVanillaMode = () => {
+    playPalateClick(0.22);
+    if (isVanillaMode) {
+      setIsVanillaMode(false);
+      if (window.electronAPI?.triggerGameMenuAction) {
+        window.electronAPI.triggerGameMenuAction('custom');
+      }
+    } else {
+      setIsVanillaMode(true);
+      if (onVanilla) {
+        onVanilla();
+      }
+    }
+  };
+
   return (
-    <div className="relative w-full h-full overflow-hidden select-none bg-[#050608] text-[#f1f5f9] flex flex-col justify-between font-sans">
-      {/* Solid Opaque Backdrop */}
-      <div className="absolute inset-0 bg-[#050608]" />
-
-      {/* Background Layer: Minecraft Voxel Landscape */}
+    <div
+      className={`relative w-full h-full overflow-hidden select-none font-sans flex flex-col justify-between transition-colors duration-500 ${
+        isVanillaMode ? 'bg-transparent pointer-events-none' : 'bg-[#050608] text-[#f1f5f9]'
+      }`}
+    >
+      {/* Solid Opaque Backdrop & Voxel Background (fades smoothly in vanilla mode) */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 filter brightness-90 transition-transform duration-1000 ease-out"
-        style={{
-          backgroundImage: 'url(/menu_background.jpg)',
-        }}
-      />
+        className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${
+          isVanillaMode ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
+        <div className="absolute inset-0 bg-[#050608]" />
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 filter brightness-90 transition-transform duration-1000 ease-out"
+          style={{ backgroundImage: 'url(/menu_background.jpg)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#06070a]/95 via-[#06070a]/50 to-[#06070a]/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#050608_95%)]" />
+      </div>
 
-      {/* Atmospheric Overlays: Dark obsidian gradients */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#06070a]/95 via-[#06070a]/50 to-[#06070a]/80 pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#050608_95%)] pointer-events-none" />
-
-      {/* Top Header Bar: Unified Dark TitleBar directly matching the Launcher with custom window controls */}
+      {/* Top Header Bar: Always active and accessible with custom controls */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: smoothEase }}
-        className="relative z-40 h-11 w-full flex items-center justify-between px-3 border-b border-[#181818] bg-[#0a0a0a]/90 backdrop-blur-md select-none"
+        transition={{ duration: 0.45, ease: smoothEase }}
+        className="relative z-40 h-11 w-full flex items-center justify-between px-3 border-b border-[#181818] bg-[#0a0a0a]/92 backdrop-blur-md select-none pointer-events-auto"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
         {/* Left: Launcher Logo & Title */}
@@ -192,31 +263,44 @@ export function InGameWebMenu({
           </span>
         </div>
 
-        {/* Right: Language Selector & Window Control Buttons */}
+        {/* Right: Mode Switcher, Language Selector & Window Control Buttons */}
         <div
           className="flex items-center gap-2 h-full -mr-3"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          {/* Switch to Classic Vanilla GUI button */}
-          {onVanilla && (
-            <button
-              onClick={() => {
-                playPalateClick(0.24);
-                onVanilla();
-              }}
-              title={
-                language === 'ru'
-                  ? 'Переключиться на стандартное меню игры'
-                  : 'Switch to classic vanilla Minecraft menu'
-              }
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#12141c]/90 hover:bg-[#1a1d29] border border-[#222634] hover:border-[#38bdf8]/50 transition-colors duration-150 cursor-pointer group shadow-sm mr-1"
-            >
-              <RotateCcw className="w-3 h-3 text-[#94a3b8] group-hover:text-[#38bdf8] transition-colors duration-150" />
-              <span className="text-[11px] font-bold tracking-wider uppercase font-['Barlow_Condensed',sans-serif] text-[#cbd5e1] group-hover:text-white">
-                {language === 'ru' ? 'Ванилла' : 'Vanilla'}
-              </span>
-            </button>
-          )}
+          {/* Switch between Custom Client UI and Native Embedded Vanilla View */}
+          <button
+            onClick={handleToggleVanillaMode}
+            title={
+              isVanillaMode
+                ? language === 'ru'
+                  ? 'Открыть кастомное меню ELauncher'
+                  : 'Open custom ELauncher client menu'
+                : language === 'ru'
+                  ? 'Показать оригинальный интерфейс игры'
+                  : 'Show classic vanilla Minecraft screen'
+            }
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all duration-200 cursor-pointer group shadow-sm mr-1 ${
+              isVanillaMode
+                ? 'bg-[#141b28] hover:bg-[#1c2638] border-[#38bdf8]/60 text-white shadow-[0_0_12px_rgba(56,189,248,0.22)]'
+                : 'bg-[#12141c]/90 hover:bg-[#1a1d29] border-[#222634] hover:border-[#38bdf8]/50 text-[#cbd5e1]'
+            }`}
+          >
+            {isVanillaMode ? (
+              <Sparkles className="w-3 h-3 text-[#38bdf8] group-hover:rotate-12 transition-transform duration-200" />
+            ) : (
+              <RotateCcw className="w-3 h-3 text-[#94a3b8] group-hover:text-[#38bdf8] transition-colors duration-200" />
+            )}
+            <span className="text-[11px] font-bold tracking-wider uppercase font-['Barlow_Condensed',sans-serif]">
+              {isVanillaMode
+                ? language === 'ru'
+                  ? 'Клиент'
+                  : 'Client UI'
+                : language === 'ru'
+                  ? 'Ванилла'
+                  : 'Vanilla'}
+            </span>
+          </button>
 
           {/* Language Selector */}
           <div className="relative mr-1">
@@ -291,7 +375,6 @@ export function InGameWebMenu({
               className="w-10 h-full flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#161616] transition-colors cursor-pointer"
             >
               {isMaximized ? (
-                /* Two overlapping squares (Windows restore icon) */
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
                   <path
                     d="M3.75 2H9.8C10.46 2 11 2.54 11 3.2V9.25"
@@ -311,7 +394,6 @@ export function InGameWebMenu({
                   />
                 </svg>
               ) : (
-                /* Single smooth square (Maximize icon) */
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
                   <rect
                     x="1.25"
@@ -340,7 +422,11 @@ export function InGameWebMenu({
       </motion.div>
 
       {/* Main Center Stage: Responsively scaled Logo + Menu Buttons */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 overflow-visible">
+      <div
+        className={`relative z-10 flex-1 flex flex-col items-center justify-center px-4 overflow-visible transition-all duration-400 ${
+          isVanillaMode ? 'opacity-0 pointer-events-none scale-98' : 'opacity-100 pointer-events-auto scale-100'
+        }`}
+      >
         <div
           style={{
             transform: `scale(${guiScale})`,
@@ -348,11 +434,15 @@ export function InGameWebMenu({
           }}
           className="w-full max-w-[560px] flex flex-col items-center justify-center transition-transform duration-300 ease-out"
         >
-          {/* Title Header - Official Crisp Large ELauncher Project Brand Logo */}
+          {/* Title Header - Smooth entrance when loader exits */}
           <motion.div
-            initial={{ opacity: 0, y: -16, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.45, ease: smoothEase }}
+            initial={{ opacity: 0, y: -36, scale: 0.92 }}
+            animate={
+              isMenuVisible
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: -36, scale: 0.92 }
+            }
+            transition={{ duration: 0.65, ease: smoothEase }}
             className={`flex items-center justify-center relative select-none ${
               isCompact ? 'mb-4' : 'mb-6 sm:mb-8'
             }`}
@@ -366,7 +456,7 @@ export function InGameWebMenu({
             />
           </motion.div>
 
-          {/* 4 Main Action Buttons (Instant synchronous GPU-accelerated hover) */}
+          {/* 4 Main Action Buttons - Staggered Cascading Entrance */}
           <div className={`w-full max-w-[440px] sm:max-w-[470px] flex flex-col ${isCompact ? 'gap-2' : 'gap-2.5'}`}>
             {menuButtons.map((btn, index) => {
               const Icon = btn.icon;
@@ -375,9 +465,17 @@ export function InGameWebMenu({
               return (
                 <motion.div
                   key={btn.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: index * 0.03, ease: smoothEase }}
+                  initial={{ opacity: 0, y: 28 }}
+                  animate={
+                    isMenuVisible
+                      ? { opacity: 1, y: 0 }
+                      : { opacity: 0, y: 28 }
+                  }
+                  transition={{
+                    duration: 0.45,
+                    delay: isMenuVisible ? 0.12 + index * 0.08 : 0,
+                    ease: smoothEase,
+                  }}
                 >
                   <button
                     onClick={() => {
@@ -419,7 +517,6 @@ export function InGameWebMenu({
                       </div>
                     </div>
 
-                    {/* Right Arrow / Indicator with smooth hover transition */}
                     <div
                       className={`relative z-10 text-xs font-mono font-bold px-2 py-0.5 rounded-md transition-all duration-300 ease-out group-hover:translate-x-1 ${
                         isDanger
@@ -437,22 +534,21 @@ export function InGameWebMenu({
         </div>
       </div>
 
-      {/* Subtle bottom buffer spacing */}
       <div className={`${isCompact ? 'h-2' : 'h-3'} pointer-events-none`} />
 
-      {/* Dedicated Fullscreen Loading Screen: Completely opaque separate screen until Minecraft TitleScreen is ready */}
+      {/* Cinematic Fullscreen Loader with 2-Stage Smooth Exit Transition */}
       <AnimatePresence>
-        {!isGameReady && (
+        {loadStage !== 'ready' && (
           <motion.div
             initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: loadStage === 'fading_curtain' ? 0 : 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.45, ease: smoothEase }}
-            className="absolute inset-0 z-50 flex flex-col justify-between bg-[#050608] select-none"
+            transition={{ duration: 0.32, ease: smoothEase }}
+            className="absolute inset-0 z-50 flex flex-col justify-between bg-[#050608] select-none pointer-events-auto"
           >
             {/* Dark Loading TitleBar */}
             <div
-              className="h-11 w-full flex items-center justify-between px-3 border-b border-[#181818] bg-[#0a0a0a]/90 backdrop-blur-md"
+              className="h-11 w-full flex items-center justify-between px-3 border-b border-[#181818] bg-[#0a0a0a]/92 backdrop-blur-md"
               style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
             >
               <div
@@ -496,7 +592,6 @@ export function InGameWebMenu({
                   className="w-10 h-full flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#161616] transition-colors cursor-pointer"
                 >
                   {isMaximized ? (
-                    /* Two overlapping squares (Windows restore icon) */
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
                       <path
                         d="M3.75 2H9.8C10.46 2 11 2.54 11 3.2V9.25"
@@ -516,7 +611,6 @@ export function InGameWebMenu({
                       />
                     </svg>
                   ) : (
-                    /* Single smooth square (Maximize icon) */
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
                       <rect
                         x="1.25"
@@ -543,74 +637,70 @@ export function InGameWebMenu({
               </div>
             </div>
 
-            {/* Center Loading Stage: Sleek Rotating Circle (NO center dot) + "WAIT A MOMENT..." */}
+            {/* Center Loading Stage: Text floats up & dissolves gracefully when ready */}
             <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-                {/* Soft ambient blur glow */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.25, 1],
-                    opacity: [0.15, 0.35, 0.15],
-                  }}
-                  transition={{
-                    duration: 2.2,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  className="absolute inset-0 rounded-full bg-[#38bdf8] blur-xl pointer-events-none"
-                />
-
-                {/* Rotating SVG Ring (Clean, no center dot) */}
-                <motion.svg
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 1.1,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }}
-                  className="w-full h-full"
-                  viewBox="0 0 80 80"
-                >
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="34"
-                    fill="none"
-                    stroke="#161b26"
-                    strokeWidth="3.5"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="34"
-                    fill="none"
-                    stroke="#38bdf8"
-                    strokeWidth="3.5"
-                    strokeDasharray="60 160"
-                    strokeLinecap="round"
-                  />
-                </motion.svg>
-              </div>
-
-              {/* Text underneath: "WAIT A MOMENT..." / "ПОДОЖДИТЕ..." */}
               <motion.div
-                animate={{
-                  opacity: [0.75, 1, 0.75],
-                }}
-                transition={{
-                  duration: 1.8,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
-                className="text-center"
+                animate={
+                  loadStage === 'fading_text' || loadStage === 'fading_curtain'
+                    ? { opacity: 0, y: -28, scale: 0.92, filter: 'blur(8px)' }
+                    : { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+                }
+                transition={{ duration: 0.45, ease: smoothEase }}
+                className="flex flex-col items-center justify-center gap-6"
               >
-                <span className="text-sm sm:text-base font-bold tracking-widest text-[#cbd5e1] font-['Barlow_Condensed',sans-serif] uppercase">
-                  {t.waitAMoment}
-                </span>
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.25, 1],
+                      opacity: [0.15, 0.35, 0.15],
+                    }}
+                    transition={{
+                      duration: 2.2,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                    className="absolute inset-0 rounded-full bg-[#38bdf8] blur-xl pointer-events-none"
+                  />
+
+                  <motion.svg
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1.1,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                    className="w-full h-full"
+                    viewBox="0 0 80 80"
+                  >
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="#161b26"
+                      strokeWidth="3.5"
+                    />
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="#38bdf8"
+                      strokeWidth="3.5"
+                      strokeDasharray="60 160"
+                      strokeLinecap="round"
+                    />
+                  </motion.svg>
+                </div>
+
+                <div className="text-center">
+                  <span className="text-sm sm:text-base font-bold tracking-widest text-[#cbd5e1] font-['Barlow_Condensed',sans-serif] uppercase">
+                    {t.waitAMoment}
+                  </span>
+                </div>
               </motion.div>
             </div>
 
-            {/* Bottom spacer */}
             <div className="h-11 pointer-events-none" />
           </motion.div>
         )}
