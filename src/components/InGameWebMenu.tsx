@@ -78,7 +78,7 @@ export function InGameWebMenu({
     };
   }, []);
 
-  // Dynamic responsive scaling for ANY window resolution (windowed 960x540 up to 4K)
+  // Dynamic responsive scaling for ANY window resolution (windowed 854x480 up to 4K)
   useEffect(() => {
     const updateScale = () => {
       const h = window.innerHeight;
@@ -87,10 +87,10 @@ export function InGameWebMenu({
 
       const availH = Math.max(100, h - (h < 560 ? 56 : 90));
       const availW = Math.max(100, w - 40);
-      const scaleByH = availH / 360;
-      const scaleByW = availW / 520;
+      const scaleByH = availH / 285;
+      const scaleByW = availW / 410;
       const target = Math.min(1.08, Math.min(scaleByH, scaleByW));
-      setGuiScale(Math.max(0.72, target));
+      setGuiScale(Math.max(0.68, target));
     };
     updateScale();
     window.addEventListener('resize', updateScale);
@@ -123,14 +123,14 @@ export function InGameWebMenu({
     {
       id: 'settings',
       title: language === 'ru' ? 'Настройки' : 'Settings',
-      subtitle: language === 'ru' ? 'Параметры' : 'Game settings',
+      subtitle: language === 'ru' ? 'Настройки игры' : 'Game settings',
       icon: SettingsIcon,
       onClick: onSettings,
     },
     {
       id: 'quit',
       title: language === 'ru' ? 'Выход' : 'Quit Game',
-      subtitle: language === 'ru' ? 'Закрыть игру' : 'Exit to desktop',
+      subtitle: language === 'ru' ? 'Выход из игры' : 'Quit Minecraft',
       icon: LogOut,
       onClick: onQuit,
       danger: true,
@@ -151,7 +151,7 @@ export function InGameWebMenu({
       />
 
       {/* Atmospheric Overlays: Dark obsidian gradients */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#06070a]/95 via-[#06070a]/60 to-[#06070a]/85 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#06070a]/95 via-[#06070a]/50 to-[#06070a]/80 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#050608_95%)] pointer-events-none" />
 
       {/* Top Header Bar: Unified Dark TitleBar directly matching the Launcher with custom window controls */}
@@ -305,26 +305,195 @@ export function InGameWebMenu({
         </div>
       </motion.div>
 
-      {/* Main Content Area: Smooth Transition between Loading State and Custom Menu GUI */}
+      {/* Main Center Stage: Responsively scaled Logo + Menu Buttons */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 overflow-visible">
-        <AnimatePresence mode="wait">
-          {!isGameReady ? (
-            /* Custom Smooth Loading Screen: Center circle with wait a moment... */
-            <motion.div
-              key="loading-screen"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.35, ease: smoothEase }}
-              className="flex flex-col items-center justify-center gap-5 select-none"
+        <div
+          style={{
+            transform: `scale(${guiScale})`,
+            transformOrigin: 'center center',
+          }}
+          className="w-full max-w-[560px] flex flex-col items-center justify-center transition-transform duration-300 ease-out"
+        >
+          {/* Title Header - Official Crisp Large ELauncher Project Brand Logo */}
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.45, ease: smoothEase }}
+            className={`flex items-center justify-center relative select-none ${
+              isCompact ? 'mb-4' : 'mb-6 sm:mb-8'
+            }`}
+          >
+            <img
+              src="/title_elauncher_project.png"
+              alt="ELauncher Project"
+              className={`object-contain select-none drop-shadow-[0_16px_36px_rgba(0,0,0,0.95)] ${
+                isCompact ? 'h-12 sm:h-14' : 'h-18 sm:h-22 md:h-26'
+              }`}
+            />
+          </motion.div>
+
+          {/* 4 Main Action Buttons (Instant synchronous GPU-accelerated hover) */}
+          <div className={`w-full max-w-[440px] sm:max-w-[470px] flex flex-col ${isCompact ? 'gap-2' : 'gap-2.5'}`}>
+            {menuButtons.map((btn, index) => {
+              const Icon = btn.icon;
+              const isDanger = btn.danger;
+
+              return (
+                <motion.div
+                  key={btn.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: index * 0.03, ease: smoothEase }}
+                >
+                  <button
+                    onClick={() => {
+                      playPalateClick(0.24);
+                      btn.onClick();
+                    }}
+                    className={`group relative w-full ${
+                      isCompact ? 'h-[46px] px-4' : 'h-[52px] px-5'
+                    } rounded-2xl flex items-center justify-between border cursor-pointer overflow-hidden transform-gpu transition-all duration-300 ease-out hover:scale-[1.012] active:scale-[0.988] ${
+                      isDanger
+                        ? 'bg-[#0f1118]/85 hover:bg-[#1c1216]/90 border-[#232736]/80 hover:border-[#7f2633]/80 hover:shadow-[0_8px_24px_rgba(220,38,38,0.12)]'
+                        : 'bg-[#0f1118]/85 hover:bg-[#161a26]/90 border-[#232736]/80 hover:border-[#3b455e]/90 hover:shadow-[0_8px_24px_rgba(30,41,59,0.25)]'
+                    }`}
+                  >
+                    <div className="relative z-10 flex items-center gap-3.5">
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors duration-300 ease-out ${
+                          isDanger
+                            ? 'bg-[#1b1d28]/90 text-[#94a3b8] group-hover:bg-[#3b1920] group-hover:text-[#f87171]'
+                            : 'bg-[#1b1d28]/90 text-[#94a3b8] group-hover:bg-[#252c3e] group-hover:text-white'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 stroke-[2]" />
+                      </div>
+
+                      <div className="flex flex-col text-left">
+                        <span
+                          className={`text-sm sm:text-base font-bold uppercase tracking-wider font-['Barlow_Condensed',sans-serif] transition-colors duration-300 ease-out ${
+                            isDanger
+                              ? 'text-[#cbd5e1] group-hover:text-[#f87171]'
+                              : 'text-[#e2e8f0] group-hover:text-white'
+                          }`}
+                        >
+                          {btn.title}
+                        </span>
+                        <span className="text-[10px] sm:text-[11px] text-[#64748b] group-hover:text-[#94a3b8] transition-colors duration-300 ease-out leading-none">
+                          {btn.subtitle}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Right Arrow / Indicator with smooth hover transition */}
+                    <div
+                      className={`relative z-10 text-xs font-mono font-bold px-2 py-0.5 rounded-md transition-all duration-300 ease-out group-hover:translate-x-1 ${
+                        isDanger
+                          ? 'text-[#64748b] group-hover:text-[#f87171]'
+                          : 'text-[#475569] group-hover:text-[#cbd5e1]'
+                      }`}
+                    >
+                      →
+                    </div>
+                  </button>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Subtle bottom buffer spacing */}
+      <div className={`${isCompact ? 'h-2' : 'h-3'} pointer-events-none`} />
+
+      {/* Dedicated Fullscreen Loading Screen: Completely opaque separate screen until Minecraft TitleScreen is ready */}
+      <AnimatePresence>
+        {!isGameReady && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.45, ease: smoothEase }}
+            className="absolute inset-0 z-50 flex flex-col justify-between bg-[#050608] select-none"
+          >
+            {/* Dark Loading TitleBar */}
+            <div
+              className="h-11 w-full flex items-center justify-between px-3 border-b border-[#181818] bg-[#0a0a0a]/90 backdrop-blur-md"
+              style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
             >
-              {/* Glowing circular loader */}
+              <div
+                className="flex items-center gap-2.5 select-none"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+              >
+                <img
+                  src="/logo.png"
+                  alt="Logo"
+                  className="w-5 h-5 object-contain [image-rendering:-webkit-optimize-contrast]"
+                />
+                <span className="text-[12px] font-bold tracking-wider uppercase text-[#d4d4d4] font-['Barlow_Condensed',sans-serif]">
+                  ELauncher
+                </span>
+                <div className="w-[1px] h-3.5 bg-[#202020] mx-1" />
+                <span className="text-[11px] font-semibold tracking-wider uppercase text-[#64748b] font-['Barlow_Condensed',sans-serif]">
+                  Client
+                </span>
+              </div>
+
+              <div
+                className="flex items-center h-full -mr-3"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+              >
+                <button
+                  onClick={() => {
+                    playPalateClick(0.18);
+                    if (window.electronAPI?.minimize) window.electronAPI.minimize();
+                  }}
+                  title="Minimize"
+                  className="w-10 h-full flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#161616] transition-colors cursor-pointer"
+                >
+                  <Minus className="w-3.5 h-3.5 pointer-events-none" />
+                </button>
+                <button
+                  onClick={() => {
+                    playPalateClick(0.18);
+                    if (window.electronAPI?.maximize) window.electronAPI.maximize();
+                  }}
+                  title="Maximize"
+                  className="w-10 h-full flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#161616] transition-colors cursor-pointer"
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
+                    <rect
+                      x="1.25"
+                      y="1.25"
+                      width="9.5"
+                      height="9.5"
+                      rx="2"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => {
+                    playPalateClick(0.2);
+                    onQuit();
+                  }}
+                  title="Close"
+                  className="w-12 h-full flex items-center justify-center text-[#cbd5e1] hover:text-white hover:bg-[#e11d48] transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4 stroke-[2.2] pointer-events-none" />
+                </button>
+              </div>
+            </div>
+
+            {/* Center Loading Stage: Sleek Rotating Circle (NO center dot) + "WAIT A MOMENT..." */}
+            <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-                {/* Outer pulsing glow */}
+                {/* Soft ambient blur glow */}
                 <motion.div
                   animate={{
                     scale: [1, 1.25, 1],
-                    opacity: [0.18, 0.42, 0.18],
+                    opacity: [0.15, 0.35, 0.15],
                   }}
                   transition={{
                     duration: 2.2,
@@ -334,7 +503,7 @@ export function InGameWebMenu({
                   className="absolute inset-0 rounded-full bg-[#38bdf8] blur-xl pointer-events-none"
                 />
 
-                {/* Rotating SVG Ring */}
+                {/* Rotating SVG Ring (Clean, no center dot) */}
                 <motion.svg
                   animate={{ rotate: 360 }}
                   transition={{
@@ -350,7 +519,7 @@ export function InGameWebMenu({
                     cy="40"
                     r="34"
                     fill="none"
-                    stroke="#1e2433"
+                    stroke="#161b26"
                     strokeWidth="3.5"
                   />
                   <circle
@@ -360,27 +529,13 @@ export function InGameWebMenu({
                     fill="none"
                     stroke="#38bdf8"
                     strokeWidth="3.5"
-                    strokeDasharray="50 160"
+                    strokeDasharray="60 160"
                     strokeLinecap="round"
                   />
                 </motion.svg>
-
-                {/* Inner glowing core */}
-                <motion.div
-                  animate={{
-                    scale: [0.92, 1.08, 0.92],
-                    opacity: [0.7, 1, 0.7],
-                  }}
-                  transition={{
-                    duration: 1.6,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  className="absolute w-5 h-5 rounded-full bg-gradient-to-tr from-[#0284c7] to-[#38bdf8] shadow-[0_0_16px_rgba(56,189,248,0.7)]"
-                />
               </div>
 
-              {/* Subtitle: "Wait a moment..." / "Подождите..." */}
+              {/* Text underneath: "WAIT A MOMENT..." / "ПОДОЖДИТЕ..." */}
               <motion.div
                 animate={{
                   opacity: [0.75, 1, 0.75],
@@ -392,111 +547,17 @@ export function InGameWebMenu({
                 }}
                 className="text-center"
               >
-                <span className="text-sm sm:text-base font-semibold tracking-wider text-[#cbd5e1] font-['Barlow_Condensed',sans-serif] uppercase">
+                <span className="text-sm sm:text-base font-bold tracking-widest text-[#cbd5e1] font-['Barlow_Condensed',sans-serif] uppercase">
                   {t.waitAMoment}
                 </span>
               </motion.div>
-            </motion.div>
-          ) : (
-            /* Custom Client Main GUI: Brand Title + Smooth Square-Style Action Cards */
-            <motion.div
-              key="main-menu"
-              initial={{ opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.45, ease: smoothEase }}
-              style={{
-                transform: `scale(${guiScale})`,
-                transformOrigin: 'center center',
-              }}
-              className="w-full max-w-[540px] flex flex-col items-center justify-center transition-transform duration-300 ease-out"
-            >
-              {/* Title Header - Crisp Large ELauncher Project Brand Logo */}
-              <div
-                className={`flex items-center justify-center relative select-none ${
-                  isCompact ? 'mb-4' : 'mb-6 sm:mb-8'
-                }`}
-              >
-                <img
-                  src="/title_elauncher_project.png"
-                  alt="ELauncher Project"
-                  className={`object-contain select-none drop-shadow-[0_16px_36px_rgba(0,0,0,0.95)] ${
-                    isCompact ? 'h-12 sm:h-14' : 'h-18 sm:h-22 md:h-26'
-                  }`}
-                />
-              </div>
+            </div>
 
-              {/* 4 Main Action Cards Styled as Smooth Rounded Squares ("по типу квадратика") */}
-              <div className="w-full max-w-[480px] grid grid-cols-2 gap-3 sm:gap-3.5">
-                {menuButtons.map((btn, index) => {
-                  const Icon = btn.icon;
-                  const isDanger = btn.danger;
-
-                  return (
-                    <motion.button
-                      key={btn.id}
-                      type="button"
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: index * 0.04, ease: smoothEase }}
-                      whileHover={{ scale: 1.025, y: -2 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => {
-                        playPalateClick(0.24);
-                        btn.onClick();
-                      }}
-                      className={`group relative flex flex-col items-center justify-center text-center p-4 sm:p-5 rounded-2xl border cursor-pointer overflow-hidden transform-gpu transition-all duration-200 ease-out ${
-                        isDanger
-                          ? 'bg-[#0f1118]/90 hover:bg-[#1a1116]/95 border-[#232736]/80 hover:border-[#e11d48]/70 hover:shadow-[0_12px_28px_rgba(225,29,72,0.18)]'
-                          : 'bg-[#0f1118]/90 hover:bg-[#151926]/95 border-[#232736]/80 hover:border-[#38bdf8]/60 hover:shadow-[0_12px_28px_rgba(56,189,248,0.16)]'
-                      }`}
-                    >
-                      {/* Subtle ambient card glow */}
-                      <div
-                        className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl ${
-                          isDanger
-                            ? 'bg-gradient-to-b from-[#e11d48]/10 to-transparent'
-                            : 'bg-gradient-to-b from-[#38bdf8]/10 to-transparent'
-                        }`}
-                      />
-
-                      {/* Icon container */}
-                      <div
-                        className={`relative z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-2.5 transition-colors duration-200 ${
-                          isDanger
-                            ? 'bg-[#1b1d28]/90 text-[#94a3b8] group-hover:bg-[#34161c] group-hover:text-[#f87171]'
-                            : 'bg-[#1b1d28]/90 text-[#94a3b8] group-hover:bg-[#1e273b] group-hover:text-[#38bdf8]'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
-                      </div>
-
-                      {/* Title */}
-                      <span
-                        className={`relative z-10 text-sm sm:text-base font-bold uppercase tracking-wider font-['Barlow_Condensed',sans-serif] transition-colors duration-200 ${
-                          isDanger
-                            ? 'text-[#cbd5e1] group-hover:text-[#f87171]'
-                            : 'text-[#e2e8f0] group-hover:text-white'
-                        }`}
-                      >
-                        {btn.title}
-                      </span>
-
-                      {/* Subtitle */}
-                      <span className="relative z-10 text-[11px] text-[#64748b] group-hover:text-[#94a3b8] transition-colors duration-200 mt-0.5 leading-tight font-mono">
-                        {btn.subtitle}
-                      </span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Subtle bottom buffer spacing */}
-      <div className={`${isCompact ? 'h-2' : 'h-3'} pointer-events-none`} />
+            {/* Bottom spacer */}
+            <div className="h-11 pointer-events-none" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -19,6 +19,7 @@ public final class MenuState {
     public static volatile long lastTitleScreenTick = 0;
     public static volatile int framesSinceTitleScreen = 0;
     public static volatile String pendingAction = null;
+    public static volatile boolean inGameSession = false;
 
     // Window metrics updated on Minecraft's render thread
     public static volatile long minecraftHwnd = 0;
@@ -78,6 +79,7 @@ public final class MenuState {
             pendingAction = null;
             dispatchAction(titleScreen, action);
         } else {
+            inGameSession = false;
             hideMinecraftWindow();
         }
     }
@@ -169,6 +171,9 @@ public final class MenuState {
             }
 
             updateWindowMetrics(clientX, clientY, clientW, clientH, focused, iconified, visible);
+            if (isAgentActive() && !inGameSession) {
+                hideMinecraftWindow();
+            }
         } catch (Throwable ignored) {
         }
     }
@@ -178,18 +183,23 @@ public final class MenuState {
         try {
             if ("vanilla".equalsIgnoreCase(action)) {
                 System.setProperty("elauncher.active", "false");
+                inGameSession = true;
                 showMinecraftWindow();
                 return;
             } else if ("singleplayer".equalsIgnoreCase(action)) {
+                inGameSession = true;
                 showMinecraftWindow();
                 MenuDispatcher.openSingleplayer(titleScreen);
             } else if ("multiplayer".equalsIgnoreCase(action)) {
+                inGameSession = true;
                 showMinecraftWindow();
                 MenuDispatcher.openMultiplayer(titleScreen);
             } else if ("settings".equalsIgnoreCase(action)) {
+                inGameSession = true;
                 showMinecraftWindow();
                 MenuDispatcher.openSettings(titleScreen);
             } else if ("language".equalsIgnoreCase(action)) {
+                inGameSession = true;
                 showMinecraftWindow();
                 MenuDispatcher.openLanguage(titleScreen);
             } else if ("quit".equalsIgnoreCase(action)) {
