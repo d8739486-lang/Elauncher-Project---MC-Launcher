@@ -32,6 +32,10 @@ public final class MenuState {
 
     private static long lastMetricsPoll = 0;
 
+    public static boolean isAgentActive() {
+        return System.getProperty("elauncher.active") != null;
+    }
+
     public static void showMinecraftWindow() {
         try {
             long hwnd = minecraftHwnd;
@@ -47,6 +51,7 @@ public final class MenuState {
     }
 
     public static void hideMinecraftWindow() {
+        if (!isAgentActive()) return;
         try {
             long hwnd = minecraftHwnd;
             if (hwnd != 0) {
@@ -60,6 +65,11 @@ public final class MenuState {
     }
 
     public static void onTitleScreenTick(Object titleScreen) {
+        if (!isAgentActive()) {
+            activeTitleScreen = titleScreen;
+            return;
+        }
+
         activeTitleScreen = titleScreen;
         lastTitleScreenTick = System.currentTimeMillis();
 

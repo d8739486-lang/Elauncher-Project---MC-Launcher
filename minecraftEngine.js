@@ -1629,11 +1629,14 @@ export async function launchMinecraftProcess(
 
   const modAssetsDir = path.join(process.cwd(), 'mod_assets');
 
-  if (resolvedAgentPath) {
+  const isELauncherLoader = Boolean(loader && typeof loader === 'string' && loader.toLowerCase() === 'elauncher');
+
+  if (isELauncherLoader && resolvedAgentPath) {
     jvmArgs.push(`-javaagent:${resolvedAgentPath}`);
     if (!cpEntries.includes(resolvedAgentPath)) {
       cpEntries.push(resolvedAgentPath);
     }
+    jvmArgs.push('-Delauncher.active=true');
     if (resolvedBgImage) {
       jvmArgs.push(`-Delauncher.bgImage=${resolvedBgImage}`);
     }
@@ -1644,7 +1647,7 @@ export async function launchMinecraftProcess(
       raw: '[LAUNCHER] ELauncher Menu Agent активирован: ' + resolvedAgentPath + (resolvedBgImage ? ` (bg: ${path.basename(resolvedBgImage)})` : ''),
       level: 'info',
     });
-  } else {
+  } else if (isELauncherLoader) {
     onLog({
       raw: '[LAUNCHER] tools/elauncher-bg.jar не найден — собери агент через tools/build-agent.ps1',
       level: 'warn',
@@ -1858,12 +1861,21 @@ export function isMinecraftProcessRunning() {
  */
 export function stopMinecraftProcess() {
   if (activeGameProcess) {
+    const pid = activeGameProcess.pid;
+    try {
+      if (process.platform === 'win32' && pid) {
+        const { execSync } = require('child_process');
+        execSync(`taskkill /pid ${pid} /T /F`, { stdio: 'ignore' });
+      }
+    } catch {}
+    try {
+      activeGameProcess.kill('SIGKILL');
+    } catch {}
     try {
       activeGameProcess.kill('SIGTERM');
-      return true;
-    } catch {
-      return false;
-    }
+    } catch {}
+    activeGameProcess = null;
+    return true;
   }
   return false;
 }

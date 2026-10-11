@@ -544,7 +544,12 @@ function createWindow() {
         }
       );
       isGameLaunching = false;
-      startOverlayMonitor();
+      const isELauncherLoader = Boolean(loader && typeof loader === 'string' && loader.toLowerCase() === 'elauncher');
+      if (isELauncherLoader) {
+        startOverlayMonitor();
+      } else {
+        stopOverlayMonitor();
+      }
       return { success: true, pid: proc?.pid };
     } catch (err) {
       isGameLaunching = false;
