@@ -381,9 +381,9 @@ function createWindow() {
       } else {
         targetWin.maximize();
       }
-      if (targetWin === win) {
-        safeSend('maximize-changed', win.isMaximized());
-        safeSend('fullscreen-changed', win.isFullScreen());
+      if (targetWin && !targetWin.isDestroyed() && targetWin.webContents) {
+        targetWin.webContents.send('maximize-changed', targetWin.isMaximized());
+        targetWin.webContents.send('fullscreen-changed', targetWin.isFullScreen());
       }
     }
   });
@@ -392,9 +392,9 @@ function createWindow() {
     if (targetWin && !targetWin.isDestroyed()) {
       const nextState = !targetWin.isFullScreen();
       targetWin.setFullScreen(nextState);
-      if (targetWin === win) {
-        safeSend('fullscreen-changed', nextState);
-        safeSend('maximize-changed', win.isMaximized());
+      if (targetWin && !targetWin.isDestroyed() && targetWin.webContents) {
+        targetWin.webContents.send('fullscreen-changed', nextState);
+        targetWin.webContents.send('maximize-changed', targetWin.isMaximized());
       }
     }
   });
@@ -413,8 +413,14 @@ function createWindow() {
     if (targetWin && !targetWin.isDestroyed()) targetWin.close();
   });
 
-  ipcMain.handle('window-is-maximized', () => !win.isDestroyed() && win.isMaximized());
-  ipcMain.handle('window-is-fullscreen', () => !win.isDestroyed() && win.isFullScreen());
+  ipcMain.handle('window-is-maximized', (event) => {
+    const targetWin = (event?.sender ? BrowserWindow.fromWebContents(event.sender) : null) || win;
+    return !targetWin.isDestroyed() && targetWin.isMaximized();
+  });
+  ipcMain.handle('window-is-fullscreen', (event) => {
+    const targetWin = (event?.sender ? BrowserWindow.fromWebContents(event.sender) : null) || win;
+    return !targetWin.isDestroyed() && targetWin.isFullScreen();
+  });
 
   ipcMain.handle('open-path', async (_event, folderPath) => {
     try {

@@ -37,10 +37,21 @@ export function InGameWebMenu({
 }: InGameWebMenuProps) {
   const [isGameReady, setIsGameReady] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [guiScale, setGuiScale] = useState(1);
   const [windowH, setWindowH] = useState(720);
 
   const t = translations[language];
+
+  // Track window maximized state
+  useEffect(() => {
+    if (window.electronAPI?.isMaximized) {
+      window.electronAPI.isMaximized().then(setIsMaximized);
+    }
+    if (window.electronAPI?.onMaximizeChange) {
+      window.electronAPI.onMaximizeChange(setIsMaximized);
+    }
+  }, []);
 
   // Poll agent bridge until Minecraft reaches TitleScreen
   useEffect(() => {
@@ -276,20 +287,43 @@ export function InGameWebMenu({
                 playPalateClick(0.18);
                 if (window.electronAPI?.maximize) window.electronAPI.maximize();
               }}
-              title="Maximize"
+              title={isMaximized ? 'Restore' : 'Maximize'}
               className="w-10 h-full flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#161616] transition-colors cursor-pointer"
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
-                <rect
-                  x="1.25"
-                  y="1.25"
-                  width="9.5"
-                  height="9.5"
-                  rx="2"
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                />
-              </svg>
+              {isMaximized ? (
+                /* Two overlapping squares (Windows restore icon) */
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
+                  <path
+                    d="M3.75 2H9.8C10.46 2 11 2.54 11 3.2V9.25"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <rect
+                    x="1"
+                    y="2.75"
+                    width="8.25"
+                    height="8.25"
+                    rx="1.75"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                </svg>
+              ) : (
+                /* Single smooth square (Maximize icon) */
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
+                  <rect
+                    x="1.25"
+                    y="1.25"
+                    width="9.5"
+                    height="9.5"
+                    rx="2"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                </svg>
+              )}
             </button>
             <button
               onClick={() => {
@@ -458,20 +492,43 @@ export function InGameWebMenu({
                     playPalateClick(0.18);
                     if (window.electronAPI?.maximize) window.electronAPI.maximize();
                   }}
-                  title="Maximize"
+                  title={isMaximized ? 'Restore' : 'Maximize'}
                   className="w-10 h-full flex items-center justify-center text-[#707584] hover:text-white hover:bg-[#161616] transition-colors cursor-pointer"
                 >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
-                    <rect
-                      x="1.25"
-                      y="1.25"
-                      width="9.5"
-                      height="9.5"
-                      rx="2"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                    />
-                  </svg>
+                  {isMaximized ? (
+                    /* Two overlapping squares (Windows restore icon) */
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
+                      <path
+                        d="M3.75 2H9.8C10.46 2 11 2.54 11 3.2V9.25"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <rect
+                        x="1"
+                        y="2.75"
+                        width="8.25"
+                        height="8.25"
+                        rx="1.75"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                      />
+                    </svg>
+                  ) : (
+                    /* Single smooth square (Maximize icon) */
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="pointer-events-none">
+                      <rect
+                        x="1.25"
+                        y="1.25"
+                        width="9.5"
+                        height="9.5"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                      />
+                    </svg>
+                  )}
                 </button>
                 <button
                   onClick={() => {
