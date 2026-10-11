@@ -544,8 +544,10 @@ function createWindow() {
         }
       );
       isGameLaunching = false;
-      const isELauncherLoader = Boolean(loader && typeof loader === 'string' && loader.toLowerCase() === 'elauncher');
-      if (isELauncherLoader) {
+      const enableCustomClient = params?.useCustomClient !== undefined
+        ? Boolean(params.useCustomClient)
+        : Boolean(loader && typeof loader === 'string' && loader.toLowerCase() === 'elauncher');
+      if (enableCustomClient) {
         startOverlayMonitor();
       } else {
         stopOverlayMonitor();
@@ -576,6 +578,26 @@ function createWindow() {
       } catch {}
       stopOverlayMonitor();
       stopMinecraftProcess();
+      return { success: true };
+    }
+
+    // If the user clicked Switch to Vanilla Menu, close custom overlay and restore native window!
+    if (action === 'vanilla') {
+      stopOverlayMonitor();
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        try {
+          overlayWindow.destroy();
+        } catch {}
+        overlayWindow = null;
+      }
+      try {
+        const port = getAgentBridgePort();
+        await fetch(`http://127.0.0.1:${port}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'vanilla' }),
+        });
+      } catch {}
       return { success: true };
     }
 

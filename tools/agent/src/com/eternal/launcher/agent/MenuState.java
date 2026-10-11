@@ -33,7 +33,7 @@ public final class MenuState {
     private static long lastMetricsPoll = 0;
 
     public static boolean isAgentActive() {
-        return System.getProperty("elauncher.active") != null;
+        return "true".equalsIgnoreCase(System.getProperty("elauncher.active"));
     }
 
     public static void showMinecraftWindow() {
@@ -83,6 +83,9 @@ public final class MenuState {
     }
 
     public static boolean isInTitleScreen() {
+        if (!isAgentActive()) {
+            return false;
+        }
         return (System.currentTimeMillis() - lastTitleScreenTick) < 300;
     }
 
@@ -93,7 +96,6 @@ public final class MenuState {
     public static void updateWindowMetrics(int x, int y, int w, int h, boolean focused, boolean iconified,
             boolean visible) {
         winX = x;
-        winY = y;
         winWidth = Math.max(100, w);
         winHeight = Math.max(100, h);
         winFocused = focused;
@@ -174,7 +176,11 @@ public final class MenuState {
     private static void dispatchAction(Object titleScreen, String action) {
         System.out.println("[ELauncher Agent] Executing action on TitleScreen: " + action);
         try {
-            if ("singleplayer".equalsIgnoreCase(action)) {
+            if ("vanilla".equalsIgnoreCase(action)) {
+                System.setProperty("elauncher.active", "false");
+                showMinecraftWindow();
+                return;
+            } else if ("singleplayer".equalsIgnoreCase(action)) {
                 showMinecraftWindow();
                 MenuDispatcher.openSingleplayer(titleScreen);
             } else if ("multiplayer".equalsIgnoreCase(action)) {

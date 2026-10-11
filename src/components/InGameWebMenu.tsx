@@ -9,6 +9,7 @@ import {
   Check,
   Minus,
   X,
+  RotateCcw,
 } from 'lucide-react';
 import { playPalateClick } from '../utils/sound';
 import { type Language } from '../utils/i18n';
@@ -19,6 +20,7 @@ interface InGameWebMenuProps {
   onSingleplayer: () => void;
   onMultiplayer: () => void;
   onSettings: () => void;
+  onVanilla?: () => void;
   onQuit: () => void;
 }
 
@@ -30,6 +32,7 @@ export function InGameWebMenu({
   onSingleplayer,
   onMultiplayer,
   onSettings,
+  onVanilla,
   onQuit,
 }: InGameWebMenuProps) {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
@@ -145,6 +148,27 @@ export function InGameWebMenu({
           className="flex items-center gap-2 h-full -mr-3"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
+          {/* Switch to Classic Vanilla GUI button */}
+          {onVanilla && (
+            <button
+              onClick={() => {
+                playPalateClick(0.24);
+                onVanilla();
+              }}
+              title={
+                language === 'ru'
+                  ? 'Переключиться на стандартное меню игры'
+                  : 'Switch to classic vanilla Minecraft menu'
+              }
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#12141c]/90 hover:bg-[#1a1d29] border border-[#222634] hover:border-[#38bdf8]/50 transition-colors duration-150 cursor-pointer group shadow-sm mr-1"
+            >
+              <RotateCcw className="w-3 h-3 text-[#94a3b8] group-hover:text-[#38bdf8] transition-colors duration-150" />
+              <span className="text-[11px] font-bold tracking-wider uppercase font-['Barlow_Condensed',sans-serif] text-[#cbd5e1] group-hover:text-white">
+                {language === 'ru' ? 'Ванилла' : 'Vanilla'}
+              </span>
+            </button>
+          )}
+
           {/* Language Selector */}
           <div className="relative mr-1">
             <button

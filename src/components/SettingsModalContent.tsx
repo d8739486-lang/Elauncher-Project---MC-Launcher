@@ -10,6 +10,8 @@ import {
   RefreshCw,
   ChevronDown,
   RotateCcw,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import type { Language } from '../utils/i18n';
 import { translations } from '../utils/i18n';
@@ -24,6 +26,7 @@ export interface AppSettings {
   launcherPath: string;
   selectedJavaVersion?: 'auto' | '8' | '11' | '17' | '21' | '25' | '27' | string;
   customJavaPath?: string;
+  useCustomClient?: boolean;
 }
 
 interface SettingsModalContentProps {
@@ -355,6 +358,66 @@ export function SettingsModalContent({
                   <Check className="w-3 h-3 stroke-[3]" />
                 </div>
               )}
+            </button>
+          </div>
+        </div>
+
+        {/* Section: ELauncher Client Mode (Lunar Client Experience) */}
+        <div className="space-y-4 pt-4 border-t border-[#1c1f2b]">
+          <div>
+            <div className="flex items-center gap-2 text-white font-bold text-base tracking-wide">
+              <Sparkles className="w-4 h-4 text-[#38bdf8]" />
+              <AnimatedText text={t.customClientSectionTitle} />
+            </div>
+            <p className="text-xs font-mono text-[#7b8398] mt-1">
+              <AnimatedText text={t.customClientSectionDesc} />
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#0f1118] border border-[#1e2230] hover:border-[#2a3044] transition-colors flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-200 ${
+                  settings.useCustomClient !== false
+                    ? 'bg-[#152338] text-[#38bdf8] border border-[#234164]'
+                    : 'bg-[#14161f] text-[#6c748c] border border-[#202434]'
+                }`}
+              >
+                <Layers className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-white tracking-wide">
+                  {settings.useCustomClient !== false
+                    ? t.customClientEnabled
+                    : t.customClientDisabled}
+                </span>
+                <span className="text-xs font-mono text-[#7b8398] mt-0.5">
+                  {settings.useCustomClient !== false
+                    ? (settings.language === 'ru'
+                        ? 'Отдельное безрамочное окно меню с переходом в игру'
+                        : 'Standalone frameless client window with instant game transfer')
+                    : (settings.language === 'ru'
+                        ? 'Стандартное главное меню игры Mojang'
+                        : 'Classic default Mojang TitleScreen')}
+                </span>
+              </div>
+            </div>
+
+            {/* Clean Switch Toggle */}
+            <button
+              onClick={() => {
+                playPalateClick(0.24);
+                onUpdateSettings({ useCustomClient: settings.useCustomClient === false ? true : false });
+              }}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                settings.useCustomClient !== false ? 'bg-[#38bdf8]' : 'bg-[#222634]'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                  settings.useCustomClient !== false ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
             </button>
           </div>
         </div>

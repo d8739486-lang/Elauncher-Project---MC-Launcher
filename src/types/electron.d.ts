@@ -98,6 +98,7 @@ declare global {
         account?: any;
         selectedJavaVersion?: string;
         customJavaPath?: string;
+        useCustomClient?: boolean;
       }) => Promise<{ success: boolean; pid?: number; error?: string }>;
       stopMinecraft?: () => Promise<boolean>;
       detectSystemJavas?: (params?: string | { launcherPath: string }) => Promise<JavaInfo[]>;

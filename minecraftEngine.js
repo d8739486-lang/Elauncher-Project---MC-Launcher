@@ -1629,9 +1629,11 @@ export async function launchMinecraftProcess(
 
   const modAssetsDir = path.join(process.cwd(), 'mod_assets');
 
-  const isELauncherLoader = Boolean(loader && typeof loader === 'string' && loader.toLowerCase() === 'elauncher');
+  const enableCustomClient = params?.useCustomClient !== undefined
+    ? Boolean(params.useCustomClient)
+    : Boolean(loader && typeof loader === 'string' && loader.toLowerCase() === 'elauncher');
 
-  if (isELauncherLoader && resolvedAgentPath) {
+  if (enableCustomClient && resolvedAgentPath) {
     jvmArgs.push(`-javaagent:${resolvedAgentPath}`);
     if (!cpEntries.includes(resolvedAgentPath)) {
       cpEntries.push(resolvedAgentPath);
@@ -1644,13 +1646,18 @@ export async function launchMinecraftProcess(
       jvmArgs.push(`-Delauncher.assetsDir=${modAssetsDir}`);
     }
     onLog({
-      raw: '[LAUNCHER] ELauncher Menu Agent активирован: ' + resolvedAgentPath + (resolvedBgImage ? ` (bg: ${path.basename(resolvedBgImage)})` : ''),
+      raw: '[LAUNCHER] ELauncher Custom Client Mode активен: ' + resolvedAgentPath + (resolvedBgImage ? ` (bg: ${path.basename(resolvedBgImage)})` : ''),
       level: 'info',
     });
-  } else if (isELauncherLoader) {
+  } else if (enableCustomClient) {
     onLog({
       raw: '[LAUNCHER] tools/elauncher-bg.jar не найден — собери агент через tools/build-agent.ps1',
       level: 'warn',
+    });
+  } else {
+    onLog({
+      raw: '[LAUNCHER] Запуск в стандартном режиме (Vanilla / Classic UI)',
+      level: 'info',
     });
   }
 
