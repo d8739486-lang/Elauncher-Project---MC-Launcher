@@ -104,6 +104,7 @@ declare global {
       detectSystemJavas?: (params?: string | { launcherPath: string }) => Promise<JavaInfo[]>;
       downloadJavaRuntime?: (params: { launcherPath: string; major?: number; majorVersion?: number | string }) => Promise<{ success: boolean; javaPath?: string; error?: string }>;
       triggerGameMenuAction?: (action: string) => Promise<{ success: boolean }>;
+      getAgentStatus?: () => Promise<{ inMenu?: boolean; ready?: boolean; minimized?: boolean; focused?: boolean; x?: number; y?: number; w?: number; h?: number; mcHwnd?: string }>;
       onMinecraftLog?: (callback: (logLine: string | { raw: string; level?: 'info' | 'warn' | 'error' | 'success' }) => void) => () => void;
       onMinecraftExit?: (callback: (code: number) => void) => () => void;
       onMinecraftDownloadProgress?: (callback: (data: { progress: number; text: string }) => void) => () => void;

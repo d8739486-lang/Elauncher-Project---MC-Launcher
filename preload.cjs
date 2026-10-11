@@ -117,4 +117,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   triggerGameMenuAction: (action) => {
     return ipcRenderer.invoke('trigger-game-menu-action', action);
   },
+  getAgentStatus: () => {
+    return ipcRenderer.invoke('get-agent-status');
+  },
 });

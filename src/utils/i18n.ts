@@ -152,6 +152,8 @@ export const translations = {
     customClientPromptDisableBtn: 'Classic Vanilla',
     customClientPromptSettingsHint: 'You can change this anytime in Settings',
     switchVanillaMenu: 'Switch to Vanilla Menu',
+    waitAMoment: 'Wait a moment...',
+    loadingClient: 'Starting client...',
 
     // Mods & Content View
     modsTargetInstance: 'TARGET INSTANCE:',
@@ -485,6 +487,8 @@ export const translations = {
     customClientPromptDisableBtn: 'Classic Vanilla',
     customClientPromptSettingsHint: 'You can change this anytime in Settings',
     switchVanillaMenu: 'Switch to Vanilla Menu',
+    waitAMoment: 'Wait a moment...',
+    loadingClient: 'Starting client...',
 
     // Mods & Content View
     modsTargetInstance: 'TARGET RIG:',
@@ -810,6 +814,8 @@ export const translations = {
     customClientPromptDisableBtn: 'Классический Vanilla',
     customClientPromptSettingsHint: 'Вы всегда сможете переключить этот режим в Настройках',
     switchVanillaMenu: 'Переключить на ванильное меню',
+    waitAMoment: 'Подождите...',
+    loadingClient: 'Запуск клиента...',
 
     // Mods View
     modsTargetInstance: 'ЦЕЛЕВАЯ СБОРКА:',

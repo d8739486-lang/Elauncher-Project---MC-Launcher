@@ -97,15 +97,82 @@ function stopOverlayMonitor() {
   }
 }
 
+function createOverlayWindow() {
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    if (!overlayWindow.isVisible()) {
+      overlayWindow.show();
+    }
+    overlayWindow.focus();
+    return overlayWindow;
+  }
+
+  const appIcon = getAppIcon();
+  const iconPath = path.join(__dirname, 'assets', 'icon.ico');
+
+  overlayWindow = new BrowserWindow({
+    title: 'ELauncher Client',
+    width: 1280,
+    height: 720,
+    minWidth: 960,
+    minHeight: 540,
+    frame: false,
+    transparent: false,
+    backgroundColor: '#050608',
+    skipTaskbar: false,
+    center: true,
+    icon: appIcon || iconPath,
+    resizable: true,
+    show: false,
+    hasShadow: true,
+    webPreferences: {
+      preload: path.resolve(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
+      devTools: false,
+    },
+  });
+
+  overlayWindow.setMenuBarVisibility(false);
+  overlayWindow.webContents.on('devtools-opened', () => {
+    overlayWindow.webContents.closeDevTools();
+  });
+
+  const isDev = process.env.NODE_ENV !== 'production';
+  if (isDev) {
+    overlayWindow.loadURL('http://localhost:5173/?mode=overlay');
+  } else {
+    overlayWindow.loadFile(path.join(__dirname, 'dist', 'index.html'), { query: { mode: 'overlay' } });
+  }
+
+  overlayWindow.once('ready-to-show', () => {
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.show();
+      overlayWindow.focus();
+    }
+  });
+
+  return overlayWindow;
+}
+
 function startOverlayMonitor() {
   stopOverlayMonitor();
 
+  // Create and show custom client window immediately on launch
+  createOverlayWindow();
+
   let consecutiveFailures = 0;
-  const iconPath = path.join(__dirname, 'assets', 'icon.ico');
-  const appIcon = getAppIcon();
 
   overlayMonitorInterval = setInterval(async () => {
     try {
+      if (!isMinecraftProcessRunning()) {
+        consecutiveFailures++;
+        if (consecutiveFailures > 25) {
+          stopOverlayMonitor();
+        }
+        return;
+      }
+
       const port = getAgentBridgePort();
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 350);
@@ -116,76 +183,24 @@ function startOverlayMonitor() {
       clearTimeout(timeoutId);
 
       if (!res.ok) {
-        consecutiveFailures++;
         return;
       }
 
       const status = await res.json();
       consecutiveFailures = 0;
 
-      if (status.inMenu) {
-        if (!overlayWindow || overlayWindow.isDestroyed()) {
-          const defaultW = (status.w && status.w > 400) ? Math.max(960, status.w) : 1280;
-          const defaultH = (status.h && status.h > 300) ? Math.max(600, status.h) : 720;
-
-          overlayWindow = new BrowserWindow({
-            title: 'ELauncher In-Game Menu',
-            width: defaultW,
-            height: defaultH,
-            frame: false,
-            transparent: false,
-            backgroundColor: '#050608',
-            skipTaskbar: false,
-            center: true,
-            icon: appIcon || iconPath,
-            resizable: true,
-            show: false,
-            hasShadow: true,
-            webPreferences: {
-              preload: path.resolve(__dirname, 'preload.cjs'),
-              nodeIntegration: false,
-              contextIsolation: true,
-              sandbox: false,
-              devTools: false,
-            },
-          });
-
-          overlayWindow.setMenuBarVisibility(false);
-
-          const isDev = process.env.NODE_ENV !== 'production';
-          if (isDev) {
-            overlayWindow.loadURL('http://localhost:5173/?mode=overlay');
-          } else {
-            overlayWindow.loadFile(path.join(__dirname, 'dist', 'index.html'), { query: { mode: 'overlay' } });
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        if (status.inMenu && !status.minimized) {
+          if (!overlayWindow.isVisible()) {
+            overlayWindow.show();
+            overlayWindow.focus();
           }
-        }
-
-        if (overlayWindow && !overlayWindow.isDestroyed()) {
-          const shouldBeVisible = status.inMenu && !status.minimized;
-
-          if (shouldBeVisible) {
-            if (!overlayWindow.isVisible()) {
-              overlayWindow.show();
-              overlayWindow.focus();
-            }
-          } else {
-            if (overlayWindow.isVisible()) {
-              overlayWindow.hide();
-            }
-          }
-        }
-      } else {
-        if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
-          overlayWindow.hide();
         }
       }
     } catch (err) {
-      consecutiveFailures++;
-      if (consecutiveFailures > 60 && !isMinecraftProcessRunning()) {
-        stopOverlayMonitor();
-      }
+      // Background retry during game boot
     }
-  }, 20);
+  }, 150);
 }
 
 
@@ -625,6 +640,21 @@ function createWindow() {
       }
       return { success: false, error: err.message };
     }
+  });
+
+  // Get live status from JavaAgent HTTP bridge
+  ipcMain.handle('get-agent-status', async () => {
+    try {
+      const port = getAgentBridgePort();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 400);
+      const res = await fetch(`http://127.0.0.1:${port}/status`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {}
+    return { inMenu: false, ready: false };
   });
 
   // Detect installed Java runtimes on user system
