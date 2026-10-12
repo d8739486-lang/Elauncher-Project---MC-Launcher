@@ -241,7 +241,7 @@ public final class AgentServer {
                 if ("custom".equalsIgnoreCase(action) || "restore_custom".equalsIgnoreCase(action)) {
                     System.setProperty("elauncher.active", "true");
                     MenuState.inGameSession = false;
-                    MenuState.hideMinecraftWindow();
+                    MenuState.showMinecraftWindow();
                 } else {
                     MenuState.pendingAction = action;
                 }

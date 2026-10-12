@@ -183,8 +183,12 @@ export function ModsView({
       setCatalogMods([]);
       return;
     }
-    // Only mods strictly require a non-vanilla loader. Resource packs work on any loader!
-    if (!selectedInstance || (typeToFetch === 'mod' && selectedInstance.loader === 'Vanilla')) {
+    // Only mods strictly require a non-vanilla loader. ELauncher also does not support mods and shaders.
+    const isUnsupported =
+      !selectedInstance ||
+      (typeToFetch === 'mod' && (selectedInstance.loader === 'Vanilla' || selectedInstance.loader === 'ELauncher')) ||
+      (typeToFetch === 'shader' && selectedInstance.loader === 'ELauncher');
+    if (isUnsupported) {
       setCatalogMods([]);
       return;
     }
@@ -359,7 +363,7 @@ export function ModsView({
     customVersionFile?: { url: string; fileName: string; size: number }
   ) => {
     if (!selectedInstance || !window.electronAPI?.downloadModFile) return;
-    if (isVanilla && (contentType === 'mod' || contentType === 'shader')) return;
+    if ((isVanilla || isELauncher) && (contentType === 'mod' || contentType === 'shader')) return;
 
     // For datapacks: open world selector and scan real saves
     if (contentType === 'datapack') {
@@ -551,6 +555,26 @@ export function ModsView({
     : LOADER_METADATA.Vanilla;
 
   const isVanilla = selectedInstance?.loader === 'Vanilla';
+  const isELauncher = selectedInstance?.loader === 'ELauncher';
+  const isUnsupportedContent =
+    (isVanilla && (contentType === 'mod' || contentType === 'shader')) ||
+    (isELauncher && (contentType === 'mod' || contentType === 'shader'));
+
+  const unsupportedWarning = isELauncher
+    ? contentType === 'shader'
+      ? t.shadersELauncherWarning
+      : t.modsELauncherWarning
+    : contentType === 'shader'
+    ? t.shadersVanillaWarning
+    : t.modsVanillaWarning;
+
+  const unsupportedHint = isELauncher
+    ? contentType === 'shader'
+      ? t.shadersELauncherHint
+      : t.modsELauncherHint
+    : contentType === 'shader'
+    ? t.shadersVanillaHint
+    : t.modsVanillaHint;
 
   return (
     <div className="relative w-full h-full flex flex-col overflow-hidden select-none">
@@ -625,13 +649,6 @@ export function ModsView({
             >
               {t.modsNoInstanceSelected}
             </button>
-          )}
-
-          {isVanilla && selectedInstance && (contentType === 'mod' || contentType === 'shader') && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#181113] border border-[#441d24] text-[11px] font-mono text-[#ff8080]">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              <span>{contentType === 'shader' ? t.shadersVanillaWarning : t.modsVanillaWarning}</span>
-            </div>
           )}
         </div>
 
@@ -910,14 +927,16 @@ export function ModsView({
                     {t.modsOfflineDesc}
                   </span>
                 </div>
-              ) : isVanilla && (contentType === 'mod' || contentType === 'shader') ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#64748b]">
-                  <ShieldAlert className="w-12 h-12 stroke-[1.2] mb-3 text-[#f87171]" />
-                  <span className="text-sm font-bold text-white uppercase font-['Barlow_Condensed',sans-serif] tracking-wider">
-                    {contentType === 'shader' ? t.shadersVanillaWarning : t.modsVanillaWarning}
+              ) : isUnsupportedContent ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#94a3b8] max-w-2xl mx-auto">
+                  <div className="w-20 h-20 rounded-2xl bg-[#261317]/80 border border-[#5c1d27] flex items-center justify-center mb-5 shadow-[0_0_40px_rgba(244,63,94,0.15)]">
+                    <ShieldAlert className="w-10 h-10 stroke-[1.8] text-[#fb7185]" />
+                  </div>
+                  <span className="text-xl sm:text-2xl font-black text-white uppercase font-['Barlow_Condensed',sans-serif] tracking-wider mb-2">
+                    {unsupportedWarning}
                   </span>
-                  <span className="text-xs max-w-sm mt-1 text-[#8b92a5]">
-                    {contentType === 'shader' ? t.shadersVanillaHint : t.modsVanillaHint}
+                  <span className="text-sm sm:text-base max-w-lg text-[#94a3b8] leading-relaxed">
+                    {unsupportedHint}
                   </span>
                 </div>
               ) : isLoadingCatalog && filteredCatalogMods.length === 0 ? (

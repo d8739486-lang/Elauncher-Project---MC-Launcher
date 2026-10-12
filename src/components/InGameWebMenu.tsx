@@ -62,27 +62,23 @@ export function InGameWebMenu({
     }
   }, []);
 
-  // Poll agent bridge until Minecraft reaches TitleScreen (fast 80ms poll for zero delay when music starts)
+  // Poll agent bridge until Minecraft reaches TitleScreen
   useEffect(() => {
     let isCancelled = false;
-    let pollCount = 0;
 
     const pollStatus = async () => {
-      pollCount++;
       try {
         if (window.electronAPI?.getAgentStatus) {
           const status = await window.electronAPI.getAgentStatus();
-          if (!isCancelled && (status?.inMenu || (pollCount > 150 && status?.mcHwnd && status.mcHwnd !== '0'))) {
+          if (!isCancelled && (status?.inMenu || status?.ready)) {
             setIsGameReady(true);
-            return;
           }
         } else {
           const res = await fetch('http://127.0.0.1:28751/status');
           if (res.ok) {
             const status = await res.json();
-            if (!isCancelled && (status?.inMenu || (pollCount > 150 && status?.mcHwnd && status.mcHwnd !== '0'))) {
+            if (!isCancelled && (status?.inMenu || status?.ready)) {
               setIsGameReady(true);
-              return;
             }
           }
         }
@@ -92,19 +88,11 @@ export function InGameWebMenu({
     };
 
     pollStatus();
-    const interval = setInterval(pollStatus, 80);
-
-    // Failsafe timer: if Minecraft starts slowly or agent report has a gap, never stay stuck on black screen
-    const failsafeTimeout = setTimeout(() => {
-      if (!isCancelled) {
-        setIsGameReady(true);
-      }
-    }, 12000);
+    const interval = setInterval(pollStatus, 150);
 
     return () => {
       isCancelled = true;
       clearInterval(interval);
-      clearTimeout(failsafeTimeout);
     };
   }, []);
 

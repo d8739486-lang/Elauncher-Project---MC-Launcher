@@ -43,11 +43,6 @@ public final class MenuState {
             if (hwnd != 0) {
                 User32.ShowWindow(hwnd, 1);
             }
-            long win = GLFW.glfwGetCurrentContext();
-            if (win != 0) {
-                GLFW.glfwShowWindow(win);
-                GLFW.glfwFocusWindow(win);
-            }
         } catch (Throwable ignored) {}
     }
 
@@ -57,10 +52,6 @@ public final class MenuState {
             long hwnd = minecraftHwnd;
             if (hwnd != 0) {
                 User32.ShowWindow(hwnd, 0);
-            }
-            long win = GLFW.glfwGetCurrentContext();
-            if (win != 0) {
-                GLFW.glfwHideWindow(win);
             }
         } catch (Throwable ignored) {}
     }
@@ -80,7 +71,9 @@ public final class MenuState {
             dispatchAction(titleScreen, action);
         } else {
             inGameSession = false;
-            hideMinecraftWindow();
+            // Minecraft window is embedded as a child window inside Electron container,
+            // keep it visible so it renders seamlessly underneath the custom UI.
+            showMinecraftWindow();
         }
     }
 
@@ -171,8 +164,8 @@ public final class MenuState {
             }
 
             updateWindowMetrics(clientX, clientY, clientW, clientH, focused, iconified, visible);
-            if (isAgentActive() && !inGameSession) {
-                hideMinecraftWindow();
+            if (!inGameSession) {
+                showMinecraftWindow();
             }
         } catch (Throwable ignored) {
         }

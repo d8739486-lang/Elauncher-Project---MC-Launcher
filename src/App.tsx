@@ -307,7 +307,10 @@ export default function App() {
   }, []);
 
   const handleDownloadGame = async () => {
-    if (!selectedInstance) return;
+    if (!selectedInstance) {
+      setShowNoInstanceModal(true);
+      return;
+    }
     if (!navigator.onLine) {
       setShowOfflineModal(true);
       return;
